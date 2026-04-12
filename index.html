@@ -1,165 +1,447 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cloudflare ランキングサンプル</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>タスジュウ(tasujuu)</title>
   <style>
     :root {
-      color-scheme: light dark;
-      font-family: system-ui, sans-serif;
+      --bg: #f5f7fb;
+      --panel: #ffffff;
+      --line: #d9e0ea;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --accent: #2563eb;
+      --accent-2: #0f172a;
+      --selected: #fde68a;
+      --match: #86efac;
+      --danger: #ef4444;
+      --shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+      --cell-font: clamp(18px, 3vw, 28px);
     }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      padding: 24px;
-      line-height: 1.5;
-      background: #f5f5f5;
-      color: #222;
-    }
-    .wrap {
-      max-width: 760px;
-      margin: 0 auto;
-    }
-    .card {
-      background: #fff;
-      border: 1px solid #ddd;
-      border-radius: 12px;
       padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+      background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
+      color: var(--text);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
+      line-height: 1.5;
     }
-    h1, h2 {
-      margin-top: 0;
-    }
-    .row {
+
+    .app {
+      max-width: 980px;
+      margin: 0 auto;
       display: grid;
-      grid-template-columns: 1fr;
-      gap: 12px;
+      gap: 16px;
     }
-    @media (min-width: 640px) {
-      .row.two {
-        grid-template-columns: 1fr 1fr;
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      box-shadow: var(--shadow);
+      padding: 16px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    .hero {
+      display: grid;
+      gap: 10px;
+    }
+
+    .hero h1 {
+      font-size: clamp(28px, 5vw, 42px);
+      line-height: 1.1;
+    }
+
+    .sub {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 860px) {
+      .controls {
+        grid-template-columns: 1.15fr 1fr;
       }
     }
-    label {
+
+    .field label {
       display: block;
       font-weight: 700;
       margin-bottom: 6px;
     }
-    input {
+
+    .field input {
       width: 100%;
-      box-sizing: border-box;
-      padding: 10px 12px;
-      border: 1px solid #bbb;
-      border-radius: 8px;
+      padding: 12px 14px;
+      border: 1px solid #bfc9d7;
+      border-radius: 12px;
       font-size: 16px;
       background: #fff;
-      color: #222;
+      color: var(--text);
     }
-    button {
-      border: 0;
-      border-radius: 8px;
-      padding: 10px 16px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      background: #111;
-      color: #fff;
-    }
-    button.secondary {
-      background: #666;
-    }
-    .buttons {
+
+    .button-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      margin-top: 12px;
+      align-items: center;
     }
-    .status {
-      margin-top: 12px;
+
+    button {
+      appearance: none;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: transform 0.08s ease, opacity 0.2s ease;
+    }
+
+    button:active { transform: translateY(1px); }
+    button:disabled { opacity: 0.6; cursor: default; }
+
+    .primary { background: var(--accent); color: #fff; }
+    .secondary { background: #475569; color: #fff; }
+    .ghost { background: #e2e8f0; color: #0f172a; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px;
+      background: #fafcff;
+      min-height: 82px;
+      display: grid;
+      align-content: center;
+      gap: 4px;
+    }
+
+    .stat .label {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 700;
+      letter-spacing: 0.03em;
+    }
+
+    .stat .value {
+      font-size: clamp(22px, 4vw, 30px);
+      font-weight: 800;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time-warning .value {
+      color: var(--danger);
+    }
+
+    .game-area {
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 1fr;
+    }
+
+    @media (min-width: 860px) {
+      .game-area {
+        grid-template-columns: minmax(0, 1fr) 300px;
+      }
+    }
+
+    .board-wrap {
+      display: grid;
+      gap: 12px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 6px;
+      user-select: none;
+      touch-action: manipulation;
+    }
+
+    .cell {
+      aspect-ratio: 1 / 1;
+      border-radius: 14px;
+      border: 1px solid #cdd7e4;
+      background: linear-gradient(180deg, #ffffff, #edf2f7);
+      display: grid;
+      place-items: center;
+      font-size: var(--cell-font);
+      font-weight: 800;
+      color: #0f172a;
+      cursor: pointer;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
+      transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, opacity 0.18s ease;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .cell:hover { transform: translateY(-1px); }
+    .cell.selected {
+      background: linear-gradient(180deg, #fff7cc, #fde68a);
+      border-color: #f59e0b;
+      transform: scale(0.98);
+    }
+    .cell.matching {
+      background: linear-gradient(180deg, #dcfce7, #86efac);
+      border-color: #16a34a;
+      transform: scale(0.9);
+    }
+    .cell.locked {
+      pointer-events: none;
+    }
+
+    .message {
       min-height: 1.5em;
       font-weight: 700;
+      color: var(--accent-2);
     }
-    table {
+
+    .hint {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .side {
+      display: grid;
+      gap: 16px;
+      align-content: start;
+    }
+
+    .ranking-table {
       width: 100%;
       border-collapse: collapse;
+      font-size: 14px;
     }
-    th, td {
-      text-align: left;
+
+    .ranking-table th,
+    .ranking-table td {
       padding: 10px 8px;
-      border-bottom: 1px solid #ddd;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
     }
-    td.num {
+
+    .ranking-table td:last-child,
+    .ranking-table th:last-child {
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
-    .muted {
-      color: #666;
-      font-size: 14px;
+
+    .ranking-note {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 10px;
     }
-    code {
-      background: #eee;
-      padding: 2px 6px;
-      border-radius: 6px;
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      place-items: center;
+      padding: 16px;
+      z-index: 10;
+    }
+
+    .overlay.open { display: grid; }
+
+    .modal {
+      width: min(480px, 100%);
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+      padding: 20px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .modal h2 {
+      font-size: 24px;
+    }
+
+    .result-score {
+      font-size: 44px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .result-note {
+      color: var(--muted);
+    }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
   </style>
 </head>
 <body>
-  <div class="wrap">
-    <div class="card">
-      <h1>Cloudflare ランキングサンプル</h1>
-      <p>ユーザ名とスコアを入力して保存し、ランキングを表示するだけの最小サンプルです。</p>
-      <p class="muted">匿名の <code>playerId</code> はブラウザの <code>localStorage</code> に自動保存されます。同じブラウザでは、ユーザ名を変えてもランキング枠は1つです。</p>
-    </div>
+  <div class="app">
+    <section class="panel hero">
+      <h1>タスジュウ <span style="font-size:.65em;color:#475569;">tasujuu</span></h1>
+      <p>足すと10になる隣接ペアを、30秒でどれだけ見つけられるかを競うタイムアタックパズルです。</p>
+      <p class="sub">同じブラウザでは playerId を保持し、自己ベストだけをランキング登録します。</p>
+    </section>
 
-    <div class="card">
-      <h2>スコア登録</h2>
-      <div class="row two">
-        <div>
+    <section class="controls">
+      <div class="panel" style="display:grid;gap:14px;">
+        <div class="field">
           <label for="nickname">ユーザ名</label>
-          <input id="nickname" maxlength="10" placeholder="例: TATSUO">
+          <input id="nickname" maxlength="10" placeholder="例: TATSUO" />
         </div>
-        <div>
-          <label for="score">スコア</label>
-          <input id="score" type="number" min="0" step="1" placeholder="例: 12345">
+        <div class="button-row">
+          <button id="startBtn" class="primary">ゲームスタート</button>
+          <button id="rankingBtn" class="secondary">ランキング表示</button>
+          <button id="resetBestBtn" class="ghost">自己ベスト表示更新</button>
         </div>
+        <div id="message" class="message">スタートを押すと30秒のタイムアタックが始まります。</div>
+        <div class="hint">操作: 1マス選択 → 上下左右の隣接マスをタップ。合計10なら成功です。不一致のときは後から押したマスに選択が移ります。</div>
       </div>
-      <div class="buttons">
-        <button id="saveBtn">保存</button>
-        <button id="reloadBtn" class="secondary">ランキング再読込</button>
-      </div>
-      <div id="status" class="status"></div>
-    </div>
 
-    <div class="card">
-      <h2>ランキング</h2>
-      <table>
-        <thead>
-          <tr>
-            <th>順位</th>
-            <th>ユーザ名</th>
-            <th class="num">ベストスコア</th>
-          </tr>
-        </thead>
-        <tbody id="rankingBody">
-          <tr><td colspan="3">読み込み中...</td></tr>
-        </tbody>
-      </table>
+      <div class="panel stats-panel">
+        <div class="stats">
+          <div class="stat">
+            <div class="label">現在スコア</div>
+            <div id="scoreValue" class="value">0</div>
+          </div>
+          <div class="stat" id="timeStat">
+            <div class="label">残り時間</div>
+            <div id="timeValue" class="value">30.0</div>
+          </div>
+          <div class="stat">
+            <div class="label">自己ベスト</div>
+            <div id="bestValue" class="value">0</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="game-area">
+      <div class="panel board-wrap">
+        <div id="board" class="board" aria-label="タスジュウ盤面"></div>
+      </div>
+
+      <aside class="side">
+        <section class="panel">
+          <h2 style="margin-bottom:10px;">ランキング</h2>
+          <table class="ranking-table">
+            <thead>
+              <tr>
+                <th>順位</th>
+                <th>ユーザ名</th>
+                <th>ベスト</th>
+              </tr>
+            </thead>
+            <tbody id="rankingBody">
+              <tr><td colspan="3">読み込み中...</td></tr>
+            </tbody>
+          </table>
+          <div class="ranking-note">ゲーム終了時にも自動で更新します。</div>
+        </section>
+      </aside>
+    </section>
+  </div>
+
+  <div id="resultOverlay" class="overlay" aria-hidden="true">
+    <div class="modal">
+      <h2>ゲーム終了</h2>
+      <div>
+        <div class="result-note">今回のスコア</div>
+        <div id="resultScore" class="result-score">0</div>
+      </div>
+      <div id="resultText" class="result-note"></div>
+      <div class="footer-actions">
+        <button id="playAgainBtn" class="primary">もう一度遊ぶ</button>
+        <button id="closeResultBtn" class="ghost">閉じる</button>
+      </div>
     </div>
   </div>
 
   <script>
-    // ここをあなたの Cloudflare Worker のURLに置き換える
     const API_BASE = 'https://autumn-hall-9233.tatsuo-8d3.workers.dev';
+    const BOARD_SIZE = 8;
+    const GAME_SECONDS = 30;
+    const MATCH_ANIMATION_MS = 260;
 
+    const boardEl = document.getElementById('board');
     const nicknameEl = document.getElementById('nickname');
-    const scoreEl = document.getElementById('score');
-    const statusEl = document.getElementById('status');
+    const startBtn = document.getElementById('startBtn');
+    const rankingBtn = document.getElementById('rankingBtn');
+    const resetBestBtn = document.getElementById('resetBestBtn');
+    const messageEl = document.getElementById('message');
+    const scoreValueEl = document.getElementById('scoreValue');
+    const timeValueEl = document.getElementById('timeValue');
+    const bestValueEl = document.getElementById('bestValue');
+    const timeStatEl = document.getElementById('timeStat');
     const rankingBodyEl = document.getElementById('rankingBody');
-    const saveBtn = document.getElementById('saveBtn');
-    const reloadBtn = document.getElementById('reloadBtn');
+    const resultOverlayEl = document.getElementById('resultOverlay');
+    const resultScoreEl = document.getElementById('resultScore');
+    const resultTextEl = document.getElementById('resultText');
+    const playAgainBtn = document.getElementById('playAgainBtn');
+    const closeResultBtn = document.getElementById('closeResultBtn');
+
+    let board = [];
+    let selected = null;
+    let score = 0;
+    let bestScore = Number(localStorage.getItem('tasujuuBestScore') || '0');
+    let gameActive = false;
+    let locked = false;
+    let timerId = null;
+    let gameEndAt = 0;
 
     nicknameEl.value = localStorage.getItem('nickname') || '';
+    bestValueEl.textContent = String(bestScore);
+
+    initializeBoard();
+    renderBoard();
+    loadRanking();
+
+    startBtn.addEventListener('click', () => {
+      if (gameActive) {
+        endGame('棄権しました。', false);
+      } else {
+        startGame();
+      }
+    });
+
+    rankingBtn.addEventListener('click', loadRanking);
+    resetBestBtn.addEventListener('click', () => {
+      bestValueEl.textContent = String(bestScore);
+      setMessage('自己ベスト表示を更新しました。');
+    });
+
+    playAgainBtn.addEventListener('click', () => {
+      closeResultOverlay();
+      startGame();
+    });
+
+    closeResultBtn.addEventListener('click', closeResultOverlay);
+    resultOverlayEl.addEventListener('click', (e) => {
+      if (e.target === resultOverlayEl) closeResultOverlay();
+    });
+
+    nicknameEl.addEventListener('change', () => {
+      localStorage.setItem('nickname', nicknameEl.value.trim());
+    });
 
     function getPlayerId() {
       let playerId = localStorage.getItem('playerId');
@@ -170,75 +452,220 @@
       return playerId;
     }
 
-    async function submitScore() {
+    function initializeBoard() {
+      board = Array.from({ length: BOARD_SIZE }, () =>
+        Array.from({ length: BOARD_SIZE }, () => randomDigit())
+      );
+      selected = null;
+      locked = false;
+    }
+
+    function randomDigit() {
+      return Math.floor(Math.random() * 9) + 1;
+    }
+
+    function renderBoard() {
+      const html = [];
+      for (let row = 0; row < BOARD_SIZE; row += 1) {
+        for (let col = 0; col < BOARD_SIZE; col += 1) {
+          const isSelected = selected && selected.row === row && selected.col === col;
+          const className = ['cell'];
+          if (isSelected) className.push('selected');
+          if (locked) className.push('locked');
+          html.push(
+            '<button class="' + className.join(' ') + '" data-row="' + row + '" data-col="' + col + '" aria-label="' +
+            row + '-' + col + ' の数字 ' + board[row][col] + '">' + board[row][col] + '</button>'
+          );
+        }
+      }
+      boardEl.innerHTML = html.join('');
+      for (const btn of boardEl.querySelectorAll('.cell')) {
+        btn.addEventListener('click', onCellClick);
+      }
+    }
+
+    function onCellClick(event) {
+      if (!gameActive || locked) return;
+
+      const btn = event.currentTarget;
+      const row = Number(btn.dataset.row);
+      const col = Number(btn.dataset.col);
+
+      if (!selected) {
+        selected = { row, col };
+        setMessage('1つ目を選択しました。隣接マスを選んでください。');
+        renderBoard();
+        return;
+      }
+
+      if (selected.row === row && selected.col === col) {
+        selected = null;
+        setMessage('選択を解除しました。');
+        renderBoard();
+        return;
+      }
+
+      if (!isAdjacent(selected.row, selected.col, row, col)) {
+        selected = { row, col };
+        setMessage('隣接マスではないため、選択を移しました。');
+        renderBoard();
+        return;
+      }
+
+      const a = board[selected.row][selected.col];
+      const b = board[row][col];
+
+      if (a + b === 10) {
+        handleMatch(selected.row, selected.col, row, col);
+      } else {
+        selected = { row, col };
+        setMessage(a + ' + ' + b + ' = ' + (a + b) + '。10ではありません。選択を移しました。');
+        renderBoard();
+      }
+    }
+
+    function isAdjacent(r1, c1, r2, c2) {
+      return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+    }
+
+    async function handleMatch(r1, c1, r2, c2) {
+      locked = true;
+      const matchedButtons = [
+        boardEl.querySelector('[data-row="' + r1 + '"][data-col="' + c1 + '"]'),
+        boardEl.querySelector('[data-row="' + r2 + '"][data-col="' + c2 + '"]'),
+      ];
+      for (const btn of matchedButtons) {
+        if (btn) btn.classList.add('matching');
+      }
+
+      await wait(MATCH_ANIMATION_MS);
+
+      board[r1][c1] = randomDigit();
+      board[r2][c2] = randomDigit();
+      selected = null;
+      score += 1;
+      scoreValueEl.textContent = String(score);
+      setMessage('タスジュウ成功！ スコア +1');
+      locked = false;
+      renderBoard();
+    }
+
+    function startGame() {
       const nickname = nicknameEl.value.trim();
-      const score = Number(scoreEl.value);
-
       if (!nickname) {
-        setStatus('ユーザ名を入力してください', true);
+        setMessage('ユーザ名を入力してください。', true);
+        nicknameEl.focus();
         return;
       }
 
-      if (!Number.isInteger(score) || score < 0) {
-        setStatus('スコアは0以上の整数で入力してください', true);
-        return;
+      localStorage.setItem('nickname', nickname);
+      closeResultOverlay();
+      initializeBoard();
+      renderBoard();
+      score = 0;
+      scoreValueEl.textContent = '0';
+      gameActive = true;
+      startBtn.textContent = '終了（棄権）';
+      startBtn.classList.remove('primary');
+      startBtn.classList.add('secondary');
+      gameEndAt = Date.now() + GAME_SECONDS * 1000;
+      setMessage('ゲーム開始！ 合計10の隣接ペアを探してください。');
+      updateTime();
+      clearInterval(timerId);
+      timerId = setInterval(updateTime, 50);
+    }
+
+    async function endGame(reason, shouldSubmit) {
+      if (!gameActive) return;
+
+      gameActive = false;
+      locked = true;
+      clearInterval(timerId);
+      timerId = null;
+      selected = null;
+      renderBoard();
+      timeValueEl.textContent = '0.0';
+      timeStatEl.classList.remove('time-warning');
+      startBtn.textContent = 'ゲームスタート';
+      startBtn.classList.remove('secondary');
+      startBtn.classList.add('primary');
+
+      let isBest = false;
+      if (score > bestScore) {
+        bestScore = score;
+        localStorage.setItem('tasujuuBestScore', String(bestScore));
+        bestValueEl.textContent = String(bestScore);
+        isBest = true;
       }
 
-      saveBtn.disabled = true;
-      setStatus('保存中...');
+      let submitted = false;
+      if (shouldSubmit && isBest) {
+        submitted = await submitBestScore(score);
+      }
 
+      await loadRanking();
+      showResultOverlay(score, reason, isBest, submitted);
+      setMessage(reason + ' スコア: ' + score);
+      locked = false;
+      initializeBoard();
+      renderBoard();
+    }
+
+    function updateTime() {
+      const leftMs = Math.max(0, gameEndAt - Date.now());
+      const leftSec = leftMs / 1000;
+      timeValueEl.textContent = leftSec.toFixed(1);
+      if (leftSec <= 5) {
+        timeStatEl.classList.add('time-warning');
+      } else {
+        timeStatEl.classList.remove('time-warning');
+      }
+      if (leftMs <= 0) {
+        endGame('30秒終了！', true);
+      }
+    }
+
+    async function submitBestScore(scoreToSave) {
       try {
-        localStorage.setItem('nickname', nickname);
-
-        const res = await fetch(`${API_BASE}/api/submit`, {
+        const nickname = nicknameEl.value.trim();
+        const res = await fetch(API_BASE + '/api/submit', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             playerId: getPlayerId(),
             nickname,
-            score,
+            score: scoreToSave,
           }),
         });
-
         const data = await res.json();
-
         if (!res.ok || !data.ok) {
           throw new Error(data.error || '保存に失敗しました');
         }
-
-        setStatus('保存しました');
-        scoreEl.value = '';
-        await loadRanking();
+        return true;
       } catch (err) {
-        setStatus(err.message || 'エラーが発生しました', true);
-      } finally {
-        saveBtn.disabled = false;
+        setMessage('自己ベスト保存に失敗しました: ' + (err.message || 'エラー'), true);
+        return false;
       }
     }
 
     async function loadRanking() {
       rankingBodyEl.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
-
       try {
-        const res = await fetch(`${API_BASE}/api/ranking`);
+        const res = await fetch(API_BASE + '/api/ranking');
         const data = await res.json();
-
         if (!res.ok || !data.ok) {
           throw new Error(data.error || '読み込みに失敗しました');
         }
-
         const ranking = data.ranking || [];
-
         if (ranking.length === 0) {
           rankingBodyEl.innerHTML = '<tr><td colspan="3">まだデータがありません</td></tr>';
           return;
         }
-
         rankingBodyEl.innerHTML = ranking.map((row, index) => {
           return '<tr>' +
             '<td>' + (index + 1) + '</td>' +
             '<td>' + escapeHtml(row.nickname) + '</td>' +
-            '<td class="num">' + Number(row.best_score).toLocaleString('ja-JP') + '</td>' +
+            '<td>' + Number(row.best_score).toLocaleString('ja-JP') + '</td>' +
           '</tr>';
         }).join('');
       } catch (err) {
@@ -246,9 +673,27 @@
       }
     }
 
-    function setStatus(message, isError = false) {
-      statusEl.textContent = message;
-      statusEl.style.color = isError ? '#b00020' : '#006400';
+    function showResultOverlay(finalScore, reason, isBest, submitted) {
+      resultScoreEl.textContent = String(finalScore);
+      if (isBest && submitted) {
+        resultTextEl.textContent = reason + ' 自己ベスト更新！ ランキングに登録しました。';
+      } else if (isBest) {
+        resultTextEl.textContent = reason + ' 自己ベスト更新！ ただしランキング保存は失敗しました。';
+      } else {
+        resultTextEl.textContent = reason + ' 自己ベスト更新はありませんでした。';
+      }
+      resultOverlayEl.classList.add('open');
+      resultOverlayEl.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeResultOverlay() {
+      resultOverlayEl.classList.remove('open');
+      resultOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function setMessage(message, isError = false) {
+      messageEl.textContent = message;
+      messageEl.style.color = isError ? '#b91c1c' : '#0f172a';
     }
 
     function escapeHtml(str) {
@@ -260,19 +705,9 @@
         .replaceAll("'", '&#39;');
     }
 
-    saveBtn.addEventListener('click', submitScore);
-    reloadBtn.addEventListener('click', loadRanking);
-
-    scoreEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitScore();
-    });
-
-    nicknameEl.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitScore();
-    });
-
-    getPlayerId();
-    loadRanking();
+    function wait(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
   </script>
 </body>
 </html>
