@@ -17,14 +17,14 @@
       --match: #86efac;
       --danger: #ef4444;
       --shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
-      --cell-font: clamp(18px, 3vw, 28px);
+      --cell-font: clamp(18px, 7vw, 28px);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      padding: 16px;
+      padding: 12px;
       background: linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%);
       color: var(--text);
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
@@ -32,10 +32,10 @@
     }
 
     .app {
-      max-width: 980px;
+      max-width: 560px;
       margin: 0 auto;
       display: grid;
-      gap: 16px;
+      gap: 12px;
     }
 
     .panel {
@@ -43,12 +43,10 @@
       border: 1px solid var(--line);
       border-radius: 18px;
       box-shadow: var(--shadow);
-      padding: 16px;
+      padding: 14px;
     }
 
-    h1, h2, h3, p {
-      margin: 0;
-    }
+    h1, h2, h3, p { margin: 0; }
 
     .hero {
       display: grid;
@@ -56,42 +54,22 @@
     }
 
     .hero h1 {
-      font-size: clamp(28px, 5vw, 42px);
+      font-size: clamp(28px, 9vw, 40px);
       line-height: 1.1;
     }
 
     .sub {
       color: var(--muted);
+      font-size: 13px;
+    }
+
+    .howto {
+      display: grid;
+      gap: 6px;
       font-size: 14px;
     }
 
-    .controls {
-      display: grid;
-      gap: 14px;
-      grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 860px) {
-      .controls {
-        grid-template-columns: 1.15fr 1fr;
-      }
-    }
-
-    .field label {
-      display: block;
-      font-weight: 700;
-      margin-bottom: 6px;
-    }
-
-    .field input {
-      width: 100%;
-      padding: 12px 14px;
-      border: 1px solid #bfc9d7;
-      border-radius: 12px;
-      font-size: 16px;
-      background: #fff;
-      color: var(--text);
-    }
+    .howto li { margin-left: 1.2em; }
 
     .button-row {
       display: flex;
@@ -121,48 +99,34 @@
     .stats {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
+      gap: 8px;
     }
 
     .stat {
       border: 1px solid var(--line);
       border-radius: 14px;
-      padding: 12px;
+      padding: 10px;
       background: #fafcff;
-      min-height: 82px;
+      min-height: 76px;
       display: grid;
       align-content: center;
       gap: 4px;
     }
 
     .stat .label {
-      font-size: 12px;
+      font-size: 11px;
       color: var(--muted);
       font-weight: 700;
       letter-spacing: 0.03em;
     }
 
     .stat .value {
-      font-size: clamp(22px, 4vw, 30px);
+      font-size: clamp(20px, 7vw, 30px);
       font-weight: 800;
       font-variant-numeric: tabular-nums;
     }
 
-    .time-warning .value {
-      color: var(--danger);
-    }
-
-    .game-area {
-      display: grid;
-      gap: 16px;
-      grid-template-columns: 1fr;
-    }
-
-    @media (min-width: 860px) {
-      .game-area {
-        grid-template-columns: minmax(0, 1fr) 300px;
-      }
-    }
+    .time-warning .value { color: var(--danger); }
 
     .board-wrap {
       display: grid;
@@ -172,14 +136,14 @@
     .board {
       display: grid;
       grid-template-columns: repeat(8, 1fr);
-      gap: 6px;
+      gap: 5px;
       user-select: none;
       touch-action: manipulation;
     }
 
     .cell {
       aspect-ratio: 1 / 1;
-      border-radius: 14px;
+      border-radius: 12px;
       border: 1px solid #cdd7e4;
       background: linear-gradient(180deg, #ffffff, #edf2f7);
       display: grid;
@@ -191,38 +155,131 @@
       box-shadow: inset 0 1px 0 rgba(255,255,255,0.8);
       transition: transform 0.12s ease, background 0.15s ease, border-color 0.15s ease, opacity 0.18s ease;
       font-variant-numeric: tabular-nums;
+      min-height: 38px;
     }
 
-    .cell:hover { transform: translateY(-1px); }
     .cell.selected {
       background: linear-gradient(180deg, #fff7cc, #fde68a);
       border-color: #f59e0b;
       transform: scale(0.98);
     }
+
     .cell.matching {
       background: linear-gradient(180deg, #dcfce7, #86efac);
       border-color: #16a34a;
       transform: scale(0.9);
     }
-    .cell.locked {
-      pointer-events: none;
-    }
+
+    .cell.locked { pointer-events: none; }
 
     .message {
       min-height: 1.5em;
       font-weight: 700;
       color: var(--accent-2);
-    }
-
-    .hint {
-      color: var(--muted);
       font-size: 14px;
     }
 
-    .side {
+    .ranking-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .ranking-list {
       display: grid;
-      gap: 16px;
-      align-content: start;
+      gap: 8px;
+    }
+
+    .rank-card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 10px 12px;
+      display: grid;
+      grid-template-columns: 44px 1fr auto;
+      gap: 10px;
+      align-items: center;
+      background: #fafcff;
+    }
+
+    .rank-pos {
+      font-size: 22px;
+      font-weight: 900;
+      color: #334155;
+      text-align: center;
+    }
+
+    .rank-name {
+      font-weight: 800;
+      word-break: break-all;
+    }
+
+    .rank-score {
+      font-variant-numeric: tabular-nums;
+      font-weight: 800;
+      font-size: 18px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      display: none;
+      place-items: center;
+      padding: 12px;
+      z-index: 20;
+    }
+
+    .overlay.open { display: grid; }
+
+    .modal {
+      width: min(520px, 100%);
+      max-height: min(88vh, 760px);
+      overflow: auto;
+      background: #fff;
+      border-radius: 20px;
+      border: 1px solid var(--line);
+      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
+      padding: 18px;
+      display: grid;
+      gap: 14px;
+    }
+
+    .modal h2 { font-size: 24px; }
+    .result-score {
+      font-size: 44px;
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .result-note { color: var(--muted); }
+
+    .footer-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .field label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+
+    .field input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid #bfc9d7;
+      border-radius: 12px;
+      font-size: 16px;
+      background: #fff;
+      color: var(--text);
     }
 
     .ranking-table {
@@ -244,53 +301,14 @@
       font-variant-numeric: tabular-nums;
     }
 
-    .ranking-note {
-      color: var(--muted);
-      font-size: 13px;
-      margin-top: 10px;
+    .self-row {
+      background: #fff7cc;
     }
 
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.45);
-      display: none;
-      place-items: center;
-      padding: 16px;
-      z-index: 10;
-    }
-
-    .overlay.open { display: grid; }
-
-    .modal {
-      width: min(480px, 100%);
-      background: #fff;
-      border-radius: 20px;
-      border: 1px solid var(--line);
-      box-shadow: 0 24px 60px rgba(15, 23, 42, 0.24);
-      padding: 20px;
-      display: grid;
-      gap: 14px;
-    }
-
-    .modal h2 {
-      font-size: 24px;
-    }
-
-    .result-score {
-      font-size: 44px;
-      font-weight: 900;
-      font-variant-numeric: tabular-nums;
-    }
-
-    .result-note {
-      color: var(--muted);
-    }
-
-    .footer-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
+    @media (min-width: 700px) {
+      body { padding: 16px; }
+      .app { max-width: 760px; }
+      .cell { min-height: 52px; }
     }
   </style>
 </head>
@@ -299,65 +317,53 @@
     <section class="panel hero">
       <h1>タスジュウ <span style="font-size:.65em;color:#475569;">tasujuu</span></h1>
       <p>足すと10になる隣接ペアを、30秒でどれだけ見つけられるかを競うタイムアタックパズルです。</p>
+      <div class="howto">
+        <strong>操作方法</strong>
+        <ul>
+          <li>1マスをタップすると選択されます。もう一度タップすると解除されます。</li>
+          <li>選択中に、上下左右の隣接マスをタップします。</li>
+          <li>2つの数字の合計が10なら成功。2マスが入れ替わり、スコアが1増えます。</li>
+          <li>合計が10でないときは、後からタップしたマスに選択が移ります。</li>
+        </ul>
+      </div>
       <p class="sub">同じブラウザでは playerId を保持し、自己ベストだけをランキング登録します。</p>
     </section>
 
-    <section class="controls">
-      <div class="panel" style="display:grid;gap:14px;">
-        <div class="field">
-          <label for="nickname">ユーザ名</label>
-          <input id="nickname" maxlength="10" placeholder="例: TATSUO" />
-        </div>
-        <div class="button-row">
-          <button id="startBtn" class="primary">ゲームスタート</button>
-          <button id="rankingBtn" class="secondary">ランキング表示</button>
-          <button id="resetBestBtn" class="ghost">自己ベスト表示更新</button>
-        </div>
-        <div id="message" class="message">スタートを押すと30秒のタイムアタックが始まります。</div>
-        <div class="hint">操作: 1マス選択 → 上下左右の隣接マスをタップ。合計10なら成功です。不一致のときは後から押したマスに選択が移ります。</div>
+    <section class="panel">
+      <div class="button-row">
+        <button id="startBtn" class="primary">ゲームスタート</button>
       </div>
+      <div id="message" class="message">スタートを押すと30秒のタイムアタックが始まります。</div>
+    </section>
 
-      <div class="panel stats-panel">
-        <div class="stats">
-          <div class="stat">
-            <div class="label">現在スコア</div>
-            <div id="scoreValue" class="value">0</div>
-          </div>
-          <div class="stat" id="timeStat">
-            <div class="label">残り時間</div>
-            <div id="timeValue" class="value">30.0</div>
-          </div>
-          <div class="stat">
-            <div class="label">自己ベスト</div>
-            <div id="bestValue" class="value">0</div>
-          </div>
+    <section class="panel">
+      <div class="stats">
+        <div class="stat">
+          <div class="label">現在スコア</div>
+          <div id="scoreValue" class="value">0</div>
+        </div>
+        <div class="stat" id="timeStat">
+          <div class="label">残り時間</div>
+          <div id="timeValue" class="value">30.0</div>
+        </div>
+        <div class="stat">
+          <div class="label">自己ベスト</div>
+          <div id="bestValue" class="value">0</div>
         </div>
       </div>
     </section>
 
-    <section class="game-area">
-      <div class="panel board-wrap">
-        <div id="board" class="board" aria-label="タスジュウ盤面"></div>
-      </div>
+    <section class="panel board-wrap">
+      <div id="board" class="board" aria-label="タスジュウ盤面"></div>
+    </section>
 
-      <aside class="side">
-        <section class="panel">
-          <h2 style="margin-bottom:10px;">ランキング</h2>
-          <table class="ranking-table">
-            <thead>
-              <tr>
-                <th>順位</th>
-                <th>ユーザ名</th>
-                <th>ベスト</th>
-              </tr>
-            </thead>
-            <tbody id="rankingBody">
-              <tr><td colspan="3">読み込み中...</td></tr>
-            </tbody>
-          </table>
-          <div class="ranking-note">ゲーム終了時にも自動で更新します。</div>
-        </section>
-      </aside>
+    <section class="panel">
+      <div class="ranking-head">
+        <h2>ランキング TOP 5</h2>
+        <button id="rankingBtn" class="secondary">ランキング表示</button>
+      </div>
+      <div id="top5List" class="ranking-list"></div>
+      <div class="muted">TOP 100 と自分の順位はボタンから確認できます。</div>
     </section>
   </div>
 
@@ -369,10 +375,37 @@
         <div id="resultScore" class="result-score">0</div>
       </div>
       <div id="resultText" class="result-note"></div>
+      <div class="field">
+        <label for="resultNickname">ユーザ名</label>
+        <input id="resultNickname" maxlength="10" placeholder="例: TATSUO" />
+      </div>
       <div class="footer-actions">
-        <button id="playAgainBtn" class="primary">もう一度遊ぶ</button>
+        <button id="saveResultBtn" class="primary">この名前で結果を保存</button>
+        <button id="playAgainBtn" class="secondary">もう一度遊ぶ</button>
         <button id="closeResultBtn" class="ghost">閉じる</button>
       </div>
+    </div>
+  </div>
+
+  <div id="rankingOverlay" class="overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="ranking-head" style="margin-bottom:0;">
+        <h2>ランキング TOP 100</h2>
+        <button id="closeRankingBtn" class="ghost">閉じる</button>
+      </div>
+      <table class="ranking-table">
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>ユーザ名</th>
+            <th>ベスト</th>
+          </tr>
+        </thead>
+        <tbody id="fullRankingBody">
+          <tr><td colspan="3">読み込み中...</td></tr>
+        </tbody>
+      </table>
+      <div id="selfRankNote" class="muted"></div>
     </div>
   </div>
 
@@ -383,21 +416,25 @@
     const MATCH_ANIMATION_MS = 260;
 
     const boardEl = document.getElementById('board');
-    const nicknameEl = document.getElementById('nickname');
     const startBtn = document.getElementById('startBtn');
     const rankingBtn = document.getElementById('rankingBtn');
-    const resetBestBtn = document.getElementById('resetBestBtn');
     const messageEl = document.getElementById('message');
     const scoreValueEl = document.getElementById('scoreValue');
     const timeValueEl = document.getElementById('timeValue');
     const bestValueEl = document.getElementById('bestValue');
     const timeStatEl = document.getElementById('timeStat');
-    const rankingBodyEl = document.getElementById('rankingBody');
+    const top5ListEl = document.getElementById('top5List');
     const resultOverlayEl = document.getElementById('resultOverlay');
     const resultScoreEl = document.getElementById('resultScore');
     const resultTextEl = document.getElementById('resultText');
+    const resultNicknameEl = document.getElementById('resultNickname');
+    const saveResultBtn = document.getElementById('saveResultBtn');
     const playAgainBtn = document.getElementById('playAgainBtn');
     const closeResultBtn = document.getElementById('closeResultBtn');
+    const rankingOverlayEl = document.getElementById('rankingOverlay');
+    const fullRankingBodyEl = document.getElementById('fullRankingBody');
+    const selfRankNoteEl = document.getElementById('selfRankNote');
+    const closeRankingBtn = document.getElementById('closeRankingBtn');
 
     let board = [];
     let selected = null;
@@ -407,9 +444,11 @@
     let locked = false;
     let timerId = null;
     let gameEndAt = 0;
+    let pendingResult = null;
+    let latestRanking = [];
 
-    nicknameEl.value = localStorage.getItem('nickname') || '';
     bestValueEl.textContent = String(bestScore);
+    resultNicknameEl.value = localStorage.getItem('nickname') || '';
 
     initializeBoard();
     renderBoard();
@@ -423,24 +462,29 @@
       }
     });
 
-    rankingBtn.addEventListener('click', loadRanking);
-    resetBestBtn.addEventListener('click', () => {
-      bestValueEl.textContent = String(bestScore);
-      setMessage('自己ベスト表示を更新しました。');
+    rankingBtn.addEventListener('click', () => {
+      renderFullRankingModal();
+      rankingOverlayEl.classList.add('open');
+      rankingOverlayEl.setAttribute('aria-hidden', 'false');
     });
 
-    playAgainBtn.addEventListener('click', () => {
+    closeRankingBtn.addEventListener('click', closeRankingOverlay);
+    rankingOverlayEl.addEventListener('click', (e) => {
+      if (e.target === rankingOverlayEl) closeRankingOverlay();
+    });
+
+    saveResultBtn.addEventListener('click', savePendingResult);
+    playAgainBtn.addEventListener('click', async () => {
       closeResultOverlay();
+      await loadRanking();
       startGame();
     });
-
-    closeResultBtn.addEventListener('click', closeResultOverlay);
+    closeResultBtn.addEventListener('click', async () => {
+      closeResultOverlay();
+      await loadRanking();
+    });
     resultOverlayEl.addEventListener('click', (e) => {
       if (e.target === resultOverlayEl) closeResultOverlay();
-    });
-
-    nicknameEl.addEventListener('change', () => {
-      localStorage.setItem('nickname', nicknameEl.value.trim());
     });
 
     function getPlayerId() {
@@ -551,14 +595,7 @@
     }
 
     function startGame() {
-      const nickname = nicknameEl.value.trim();
-      if (!nickname) {
-        setMessage('ユーザ名を入力してください。', true);
-        nicknameEl.focus();
-        return;
-      }
-
-      localStorage.setItem('nickname', nickname);
+      closeRankingOverlay();
       closeResultOverlay();
       initializeBoard();
       renderBoard();
@@ -575,7 +612,7 @@
       timerId = setInterval(updateTime, 50);
     }
 
-    async function endGame(reason, shouldSubmit) {
+    async function endGame(reason, timedOut) {
       if (!gameActive) return;
 
       gameActive = false;
@@ -590,25 +627,26 @@
       startBtn.classList.remove('secondary');
       startBtn.classList.add('primary');
 
-      let isBest = false;
-      if (score > bestScore) {
+      const isBest = score > bestScore;
+      if (isBest) {
         bestScore = score;
         localStorage.setItem('tasujuuBestScore', String(bestScore));
         bestValueEl.textContent = String(bestScore);
-        isBest = true;
       }
 
-      let submitted = false;
-      if (shouldSubmit && isBest) {
-        submitted = await submitBestScore(score);
-      }
+      pendingResult = {
+        score,
+        reason,
+        isBest,
+        timedOut,
+      };
 
-      await loadRanking();
-      showResultOverlay(score, reason, isBest, submitted);
+      showResultOverlay();
       setMessage(reason + ' スコア: ' + score);
       locked = false;
       initializeBoard();
       renderBoard();
+      await loadRanking();
     }
 
     function updateTime() {
@@ -625,62 +663,115 @@
       }
     }
 
-    async function submitBestScore(scoreToSave) {
+    async function savePendingResult() {
+      if (!pendingResult) return;
+      const nickname = resultNicknameEl.value.trim();
+      if (!nickname) {
+        resultTextEl.textContent = 'ユーザ名を入力してください。';
+        resultNicknameEl.focus();
+        return;
+      }
+
+      localStorage.setItem('nickname', nickname);
+      saveResultBtn.disabled = true;
+
       try {
-        const nickname = nicknameEl.value.trim();
-        const res = await fetch(API_BASE + '/api/submit', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            playerId: getPlayerId(),
-            nickname,
-            score: scoreToSave,
-          }),
-        });
-        const data = await res.json();
-        if (!res.ok || !data.ok) {
-          throw new Error(data.error || '保存に失敗しました');
+        if (pendingResult.isBest) {
+          const res = await fetch(API_BASE + '/api/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              playerId: getPlayerId(),
+              nickname,
+              score: pendingResult.score,
+            }),
+          });
+          const data = await res.json();
+          if (!res.ok || !data.ok) {
+            throw new Error(data.error || '保存に失敗しました');
+          }
+          resultTextEl.textContent = pendingResult.reason + ' 自己ベストをランキングに保存しました。';
+        } else {
+          resultTextEl.textContent = pendingResult.reason + ' 今回は自己ベスト更新ではないため、ランキング保存は行いません。';
         }
-        return true;
+
+        await loadRanking();
       } catch (err) {
-        setMessage('自己ベスト保存に失敗しました: ' + (err.message || 'エラー'), true);
-        return false;
+        resultTextEl.textContent = '保存に失敗しました: ' + (err.message || 'エラー');
+      } finally {
+        saveResultBtn.disabled = false;
       }
     }
 
     async function loadRanking() {
-      rankingBodyEl.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
+      top5ListEl.innerHTML = '<div class="muted">読み込み中...</div>';
       try {
         const res = await fetch(API_BASE + '/api/ranking');
         const data = await res.json();
         if (!res.ok || !data.ok) {
           throw new Error(data.error || '読み込みに失敗しました');
         }
-        const ranking = data.ranking || [];
-        if (ranking.length === 0) {
-          rankingBodyEl.innerHTML = '<tr><td colspan="3">まだデータがありません</td></tr>';
-          return;
-        }
-        rankingBodyEl.innerHTML = ranking.map((row, index) => {
-          return '<tr>' +
-            '<td>' + (index + 1) + '</td>' +
-            '<td>' + escapeHtml(row.nickname) + '</td>' +
-            '<td>' + Number(row.best_score).toLocaleString('ja-JP') + '</td>' +
-          '</tr>';
-        }).join('');
+        latestRanking = data.ranking || [];
+        renderTop5();
+        renderFullRankingModal();
       } catch (err) {
-        rankingBodyEl.innerHTML = '<tr><td colspan="3">' + escapeHtml(err.message || 'エラーが発生しました') + '</td></tr>';
+        top5ListEl.innerHTML = '<div class="muted">' + escapeHtml(err.message || 'エラーが発生しました') + '</div>';
+        fullRankingBodyEl.innerHTML = '<tr><td colspan="3">' + escapeHtml(err.message || 'エラーが発生しました') + '</td></tr>';
       }
     }
 
-    function showResultOverlay(finalScore, reason, isBest, submitted) {
-      resultScoreEl.textContent = String(finalScore);
-      if (isBest && submitted) {
-        resultTextEl.textContent = reason + ' 自己ベスト更新！ ランキングに登録しました。';
-      } else if (isBest) {
-        resultTextEl.textContent = reason + ' 自己ベスト更新！ ただしランキング保存は失敗しました。';
+    function renderTop5() {
+      if (latestRanking.length === 0) {
+        top5ListEl.innerHTML = '<div class="muted">まだデータがありません</div>';
+        return;
+      }
+      top5ListEl.innerHTML = latestRanking.slice(0, 5).map((row, index) => {
+        return '<div class="rank-card">' +
+          '<div class="rank-pos">' + (index + 1) + '</div>' +
+          '<div class="rank-name">' + escapeHtml(row.nickname) + '</div>' +
+          '<div class="rank-score">' + Number(row.best_score).toLocaleString('ja-JP') + '</div>' +
+        '</div>';
+      }).join('');
+    }
+
+    function renderFullRankingModal() {
+      if (latestRanking.length === 0) {
+        fullRankingBodyEl.innerHTML = '<tr><td colspan="3">まだデータがありません</td></tr>';
+        selfRankNoteEl.textContent = '';
+        return;
+      }
+
+      const playerId = getPlayerId();
+      const top100 = latestRanking.slice(0, 100);
+      const selfIndex = latestRanking.findIndex((row) => row.player_id === playerId);
+
+      fullRankingBodyEl.innerHTML = top100.map((row, index) => {
+        const isSelf = row.player_id === playerId;
+        return '<tr class="' + (isSelf ? 'self-row' : '') + '">' +
+          '<td>' + (index + 1) + '</td>' +
+          '<td>' + escapeHtml(row.nickname) + (isSelf ? '（自分）' : '') + '</td>' +
+          '<td>' + Number(row.best_score).toLocaleString('ja-JP') + '</td>' +
+        '</tr>';
+      }).join('');
+
+      if (selfIndex === -1) {
+        selfRankNoteEl.textContent = '自分のランキングデータはまだありません。';
+      } else if (selfIndex < 100) {
+        selfRankNoteEl.textContent = '自分の順位は TOP 100 内です。';
       } else {
-        resultTextEl.textContent = reason + ' 自己ベスト更新はありませんでした。';
+        const self = latestRanking[selfIndex];
+        selfRankNoteEl.textContent = '自分の順位: ' + (selfIndex + 1) + '位 / ' + self.nickname + ' / ' + Number(self.best_score).toLocaleString('ja-JP');
+      }
+    }
+
+    function showResultOverlay() {
+      if (!pendingResult) return;
+      resultScoreEl.textContent = String(pendingResult.score);
+      resultNicknameEl.value = localStorage.getItem('nickname') || '';
+      if (pendingResult.isBest) {
+        resultTextEl.textContent = pendingResult.reason + ' 自己ベスト更新です。ユーザ名を入れて保存してください。';
+      } else {
+        resultTextEl.textContent = pendingResult.reason + ' 自己ベスト更新はありません。必要ならユーザ名を入れて保存できますが、ランキングは更新されません。';
       }
       resultOverlayEl.classList.add('open');
       resultOverlayEl.setAttribute('aria-hidden', 'false');
@@ -689,6 +780,11 @@
     function closeResultOverlay() {
       resultOverlayEl.classList.remove('open');
       resultOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function closeRankingOverlay() {
+      rankingOverlayEl.classList.remove('open');
+      rankingOverlayEl.setAttribute('aria-hidden', 'true');
     }
 
     function setMessage(message, isError = false) {
