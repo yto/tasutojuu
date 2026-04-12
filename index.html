@@ -743,9 +743,11 @@
         }
 
         await loadRanking();
+        saveResultBtn.textContent = '保存しました';
+        saveResultBtn.classList.remove('primary');
+        saveResultBtn.classList.add('ghost');
       } catch (err) {
         resultTextEl.textContent = '保存に失敗しました: ' + (err.message || 'エラー');
-      } finally {
         saveResultBtn.disabled = false;
       }
     }
@@ -815,10 +817,19 @@
       if (!pendingResult) return;
       resultScoreEl.textContent = String(pendingResult.score);
       resultNicknameEl.value = localStorage.getItem('nickname') || '';
+      saveResultBtn.disabled = false;
+      saveResultBtn.textContent = 'この名前で結果を保存';
+      saveResultBtn.classList.remove('ghost');
+      saveResultBtn.classList.add('primary');
+
       if (pendingResult.isBest) {
         resultTextEl.textContent = pendingResult.reason + ' ユーザ名を入れてランキングに保存できます。';
+        saveResultBtn.style.display = '';
+        resultNicknameEl.closest('.field').style.display = '';
       } else {
         resultTextEl.textContent = pendingResult.reason + ' 自己ベスト未満のため、ランキング保存は行いません。';
+        saveResultBtn.style.display = 'none';
+        resultNicknameEl.closest('.field').style.display = 'none';
       }
       resultOverlayEl.classList.add('open');
       resultOverlayEl.setAttribute('aria-hidden', 'false');
