@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cloudflare ランキングサンプル</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      font-family: system-ui, sans-serif;
+    }
+    body {
+      margin: 0;
+      padding: 24px;
+      line-height: 1.5;
+      background: #f5f5f5;
+      color: #222;
+    }
+    .wrap {
+      max-width: 760px;
+      margin: 0 auto;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #ddd;
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    h1, h2 {
+      margin-top: 0;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    @media (min-width: 640px) {
+      .row.two {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    label {
+      display: block;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 12px;
+      border: 1px solid #bbb;
+      border-radius: 8px;
+      font-size: 16px;
+      background: #fff;
+      color: #222;
+    }
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 16px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      background: #111;
+      color: #fff;
+    }
+    button.secondary {
+      background: #666;
+    }
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .status {
+      margin-top: 12px;
+      min-height: 1.5em;
+      font-weight: 700;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    th, td {
+      text-align: left;
+      padding: 10px 8px;
+      border-bottom: 1px solid #ddd;
+    }
+    td.num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .muted {
+      color: #666;
+      font-size: 14px;
+    }
+    code {
+      background: #eee;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Cloudflare ランキングサンプル</h1>
+      <p>ユーザ名とスコアを入力して保存し、ランキングを表示するだけの最小サンプルです。</p>
+      <p class="muted">匿名の <code>playerId</code> はブラウザの <code>localStorage</code> に自動保存されます。同じブラウザでは、ユーザ名を変えてもランキング枠は1つです。</p>
+    </div>
+
+    <div class="card">
+      <h2>スコア登録</h2>
+      <div class="row two">
+        <div>
+          <label for="nickname">ユーザ名</label>
+          <input id="nickname" maxlength="10" placeholder="例: TATSUO">
+        </div>
+        <div>
+          <label for="score">スコア</label>
+          <input id="score" type="number" min="0" step="1" placeholder="例: 12345">
+        </div>
+      </div>
+      <div class="buttons">
+        <button id="saveBtn">保存</button>
+        <button id="reloadBtn" class="secondary">ランキング再読込</button>
+      </div>
+      <div id="status" class="status"></div>
+    </div>
+
+    <div class="card">
+      <h2>ランキング</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>順位</th>
+            <th>ユーザ名</th>
+            <th class="num">ベストスコア</th>
+          </tr>
+        </thead>
+        <tbody id="rankingBody">
+          <tr><td colspan="3">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script>
+    // ここをあなたの Cloudflare Worker のURLに置き換える
+    const API_BASE = 'https://autumn-hall-9233.tatsuo-8d3.workers.dev';
+
+    const nicknameEl = document.getElementById('nickname');
+    const scoreEl = document.getElementById('score');
+    const statusEl = document.getElementById('status');
+    const rankingBodyEl = document.getElementById('rankingBody');
+    const saveBtn = document.getElementById('saveBtn');
+    const reloadBtn = document.getElementById('reloadBtn');
+
+    nicknameEl.value = localStorage.getItem('nickname') || '';
+
+    function getPlayerId() {
+      let playerId = localStorage.getItem('playerId');
+      if (!playerId) {
+        playerId = crypto.randomUUID();
+        localStorage.setItem('playerId', playerId);
+      }
+      return playerId;
+    }
+
+    async function submitScore() {
+      const nickname = nicknameEl.value.trim();
+      const score = Number(scoreEl.value);
+
+      if (!nickname) {
+        setStatus('ユーザ名を入力してください', true);
+        return;
+      }
+
+      if (!Number.isInteger(score) || score < 0) {
+        setStatus('スコアは0以上の整数で入力してください', true);
+        return;
+      }
+
+      saveBtn.disabled = true;
+      setStatus('保存中...');
+
+      try {
+        localStorage.setItem('nickname', nickname);
+
+        const res = await fetch(`${API_BASE}/api/submit`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            playerId: getPlayerId(),
+            nickname,
+            score,
+          }),
+        });
+
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || '保存に失敗しました');
+        }
+
+        setStatus('保存しました');
+        scoreEl.value = '';
+        await loadRanking();
+      } catch (err) {
+        setStatus(err.message || 'エラーが発生しました', true);
+      } finally {
+        saveBtn.disabled = false;
+      }
+    }
+
+    async function loadRanking() {
+      rankingBodyEl.innerHTML = '<tr><td colspan="3">読み込み中...</td></tr>';
+
+      try {
+        const res = await fetch(`${API_BASE}/api/ranking`);
+        const data = await res.json();
+
+        if (!res.ok || !data.ok) {
+          throw new Error(data.error || '読み込みに失敗しました');
+        }
+
+        const ranking = data.ranking || [];
+
+        if (ranking.length === 0) {
+          rankingBodyEl.innerHTML = '<tr><td colspan="3">まだデータがありません</td></tr>';
+          return;
+        }
+
+        rankingBodyEl.innerHTML = ranking.map((row, index) => {
+          return '<tr>' +
+            '<td>' + (index + 1) + '</td>' +
+            '<td>' + escapeHtml(row.nickname) + '</td>' +
+            '<td class="num">' + Number(row.best_score).toLocaleString('ja-JP') + '</td>' +
+          '</tr>';
+        }).join('');
+      } catch (err) {
+        rankingBodyEl.innerHTML = '<tr><td colspan="3">' + escapeHtml(err.message || 'エラーが発生しました') + '</td></tr>';
+      }
+    }
+
+    function setStatus(message, isError = false) {
+      statusEl.textContent = message;
+      statusEl.style.color = isError ? '#b00020' : '#006400';
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    saveBtn.addEventListener('click', submitScore);
+    reloadBtn.addEventListener('click', loadRanking);
+
+    scoreEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitScore();
+    });
+
+    nicknameEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') submitScore();
+    });
+
+    getPlayerId();
+    loadRanking();
+  </script>
+</body>
+</html>
