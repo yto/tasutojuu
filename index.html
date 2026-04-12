@@ -182,7 +182,11 @@
       transform: scale(0.9);
     }
 
-    .cell.locked { pointer-events: none; }
+    .cell.locked {
+      pointer-events: none;
+      opacity: 0.35;
+      filter: grayscale(60%);
+    }
 
     .message {
       flex: 1;
@@ -539,7 +543,7 @@
         Array.from({ length: BOARD_SIZE }, () => randomDigit())
       );
       selected = null;
-      locked = false;
+      locked = true;
     }
 
     function randomDigit() {
@@ -636,6 +640,7 @@
       closeRankingOverlay();
       closeResultOverlay();
       initializeBoard();
+      locked = false;
       renderBoard();
       score = 0;
       scoreValueEl.textContent = '0';
@@ -679,12 +684,16 @@
         timedOut,
       };
 
-      showResultOverlay();
       setMessage(reason + ' スコア: ' + score);
+      await loadRanking();
+
+      if (timedOut) {
+        await wait(3000);
+      }
       locked = false;
       initializeBoard();
       renderBoard();
-      await loadRanking();
+      showResultOverlay();
     }
 
     function updateTime() {
