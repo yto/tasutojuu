@@ -1,9 +1,8 @@
 # タスジュウ (tasujuu)
 
 足すと10になる数字ペアを消していく、タイムアタック型のパズルゲームです。  
-スマートフォンでのプレイを前提に設計しています。
 
-https://yto.github.io/tasutojuu/
+**公開URL:+* https://yto.github.io/tasutojuu/
 
 ---
 
@@ -59,7 +58,9 @@ https://yto.github.io/tasutojuu/
 
 ---
 
-## 技術構成
+## 開発について
+
+このゲームは ChatGPT と Claude Code との対話を通じて開発しました
 
 ### フロントエンド
 
@@ -74,16 +75,19 @@ https://yto.github.io/tasutojuu/
 - タップ操作に最適化
 - モーダルUI（結果・ランキング）
 
----
+### バックエンド
 
-## データ設計（概要）
+- Cloudflare Workers（API サーバー）
+- Cloudflare D1（SQLite ベースのランキング DB）
+
+### データ設計（概要）
 
 ランキングは自己ベストのみを保持します
 
 - best_scores
- - player_id
- - ickname
- - best_score
+  - player_id
+  - nickname
+  - best_score
 
 ---
 
