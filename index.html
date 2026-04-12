@@ -665,8 +665,8 @@
       startBtn.classList.remove('secondary');
       startBtn.classList.add('primary');
 
-      const isBest = score > bestScore;
-      if (isBest) {
+      const isBest = score >= bestScore;
+      if (score > bestScore) {
         bestScore = score;
         localStorage.setItem('tasujuuBestScore', String(bestScore));
         bestValueEl.textContent = String(bestScore);
@@ -728,9 +728,9 @@
           if (!res.ok || !data.ok) {
             throw new Error(data.error || '保存に失敗しました');
           }
-          resultTextEl.textContent = pendingResult.reason + ' 自己ベストをランキングに保存しました。';
+          resultTextEl.textContent = pendingResult.reason + ' ランキングに保存しました。';
         } else {
-          resultTextEl.textContent = pendingResult.reason + ' 今回は自己ベスト更新ではないため、ランキング保存は行いません。';
+          resultTextEl.textContent = pendingResult.reason + ' 今回は自己ベスト未満のため、ランキング保存は行いません。';
         }
 
         await loadRanking();
@@ -807,9 +807,9 @@
       resultScoreEl.textContent = String(pendingResult.score);
       resultNicknameEl.value = localStorage.getItem('nickname') || '';
       if (pendingResult.isBest) {
-        resultTextEl.textContent = pendingResult.reason + ' 自己ベスト更新です。ユーザ名を入れて保存してください。';
+        resultTextEl.textContent = pendingResult.reason + ' ユーザ名を入れてランキングに保存できます。';
       } else {
-        resultTextEl.textContent = pendingResult.reason + ' 自己ベスト更新はありません。必要ならユーザ名を入れて保存できますが、ランキングは更新されません。';
+        resultTextEl.textContent = pendingResult.reason + ' 自己ベスト未満のため、ランキング保存は行いません。';
       }
       resultOverlayEl.classList.add('open');
       resultOverlayEl.setAttribute('aria-hidden', 'false');
