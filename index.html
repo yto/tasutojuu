@@ -188,6 +188,16 @@
       filter: grayscale(60%);
     }
 
+    .cell.hint {
+      background: linear-gradient(180deg, #ffe4e6, #fecdd3);
+      border-color: #fb7185;
+    }
+
+    .cell.locked.hint {
+      opacity: 0.75;
+      filter: none;
+    }
+
     .message {
       flex: 1;
       min-width: 0;
@@ -514,6 +524,7 @@
     let board = [];
     let selected = null;
     let score = 0;
+    let hintCells = new Set();
     let bestScore = Number(localStorage.getItem('tasujuuBestScore') || '0');
     let gameActive = false;
     let locked = false;
@@ -556,10 +567,14 @@
     });
     closeResultBtn.addEventListener('click', async () => {
       closeResultOverlay();
+      resetBoardAfterGame();
       await loadRanking();
     });
     resultOverlayEl.addEventListener('click', (e) => {
-      if (e.target === resultOverlayEl) closeResultOverlay();
+      if (e.target === resultOverlayEl) {
+        closeResultOverlay();
+        resetBoardAfterGame();
+      }
     });
 
     function getPlayerId() {
@@ -591,6 +606,7 @@
           const className = ['cell'];
           if (isSelected) className.push('selected');
           if (locked) className.push('locked');
+          if (hintCells.has(row + ',' + col)) className.push('hint');
           html.push(
             '<button class="' + className.join(' ') + '" data-row="' + row + '" data-col="' + col + '" aria-label="' +
             row + '-' + col + ' の数字 ' + board[row][col] + '">' + board[row][col] + '</button>'
@@ -643,8 +659,32 @@
       }
     }
 
+    function resetBoardAfterGame() {
+      hintCells = new Set();
+      locked = false;
+      initializeBoard();
+      renderBoard();
+    }
+
     function isAdjacent(r1, c1, r2, c2) {
       return Math.abs(r1 - r2) + Math.abs(c1 - c2) === 1;
+    }
+
+    function computeHintCells() {
+      const hints = new Set();
+      for (let r = 0; r < BOARD_SIZE; r++) {
+        for (let c = 0; c < BOARD_SIZE; c++) {
+          for (const [nr, nc] of [[r-1,c],[r+1,c],[r,c-1],[r,c+1]]) {
+            if (nr >= 0 && nr < BOARD_SIZE && nc >= 0 && nc < BOARD_SIZE) {
+              if (board[r][c] + board[nr][nc] === 10) {
+                hints.add(r + ',' + c);
+                break;
+              }
+            }
+          }
+        }
+      }
+      return hints;
     }
 
     async function handleMatch(r1, c1, r2, c2) {
@@ -694,6 +734,7 @@
 
       await runCountdown();
 
+      hintCells = new Set();
       initializeBoard();
       locked = false;
       renderBoard();
@@ -717,6 +758,7 @@
       clearInterval(timerId);
       timerId = null;
       selected = null;
+      hintCells = computeHintCells();
       renderBoard();
       timeValueEl.textContent = '0.0';
       timeStatEl.classList.remove('time-warning');
@@ -744,9 +786,6 @@
       if (timedOut) {
         await wait(2000);
       }
-      locked = false;
-      initializeBoard();
-      renderBoard();
       showResultOverlay();
     }
 
