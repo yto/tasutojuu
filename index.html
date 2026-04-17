@@ -695,6 +695,8 @@
 
       await wait(MATCH_ANIMATION_MS);
 
+      if (!gameActive) return;
+
       board[r1][c1] = randomDigit();
       board[r2][c2] = randomDigit();
       selected = null;
