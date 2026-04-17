@@ -567,14 +567,10 @@
     });
     closeResultBtn.addEventListener('click', async () => {
       closeResultOverlay();
-      resetBoardAfterGame();
       await loadRanking();
     });
     resultOverlayEl.addEventListener('click', (e) => {
-      if (e.target === resultOverlayEl) {
-        closeResultOverlay();
-        resetBoardAfterGame();
-      }
+      if (e.target === resultOverlayEl) closeResultOverlay();
     });
 
     function getPlayerId() {
