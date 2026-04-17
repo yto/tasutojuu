@@ -70,7 +70,7 @@
 
 このゲームは ChatGPT と Claude Code との対話を通じて開発しました
 
-Claude Code との対話ログ（セッションログ）を公開しています：[session-log.md](session-log.md)
+Claude Code との対話ログ（セッションログ）を公開しています（途中から＆途中まで）：[session-log.md](session-log.md)
 
 ### フロントエンド
 
