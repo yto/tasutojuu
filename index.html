@@ -823,18 +823,40 @@
       }
     });
 
+    let restoreConfirming = false;
+
+    function resetRestoreBtn() {
+      restoreConfirming = false;
+      restoreBtn.textContent = 'この端末に引き継ぐ';
+      restoreBtn.classList.remove('secondary');
+      restoreBtn.classList.add('primary');
+      settingsMessageEl.textContent = '';
+      settingsMessageEl.style.color = '';
+    }
+
     restoreCodeInputEl.addEventListener('input', (e) => {
       let val = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8);
       if (val.length > 4) val = val.slice(0, 4) + '-' + val.slice(4);
       e.target.value = val;
+      if (restoreConfirming) resetRestoreBtn();
     });
 
     restoreBtn.addEventListener('click', async () => {
       const code = restoreCodeInputEl.value.trim().toUpperCase();
       if (!code) {
         settingsMessageEl.textContent = 'コードを入力してください。';
+        settingsMessageEl.style.color = '';
         return;
       }
+      if (!restoreConfirming) {
+        restoreConfirming = true;
+        restoreBtn.textContent = 'もう一度押して確認';
+        restoreBtn.classList.remove('primary');
+        restoreBtn.classList.add('secondary');
+        showSettingsMessage('現在のデータが上書きされます。よろしいですか？', 'error');
+        return;
+      }
+      resetRestoreBtn();
       restoreBtn.disabled = true;
       settingsMessageEl.textContent = '';
       try {
@@ -1072,8 +1094,8 @@
       const isBest = score >= bestScore;
       if (score > bestScore) {
         bestScore = score;
-        localStorage.setItem('tasujuuBestScore', String(bestScore));
         bestValueEl.textContent = String(bestScore);
+        // localStorage への保存はランキング登録成功時に行う
       }
 
       pendingResult = { score, reason, isBest, timedOut };
@@ -1132,6 +1154,7 @@
           if (!res.ok || !data.ok) {
             throw new Error(data.error || '保存に失敗しました');
           }
+          localStorage.setItem('tasujuuBestScore', String(pendingResult.score));
           resultTextEl.textContent = pendingResult.reason + ' ランキングに保存しました。';
         } else {
           resultTextEl.textContent = pendingResult.reason + ' 今回は自己ベスト未満のため、ランキング保存は行いません。';
