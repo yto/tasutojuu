@@ -1,0 +1,8 @@
+name = "autumn-hall-9233"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "puzzle-ranking"
+database_id = "66a6b5cf-0ad9-472d-ad94-56ed348bff02"
