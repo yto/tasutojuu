@@ -430,6 +430,26 @@
     }
     .code-copy-btn:hover { color: #475569; background: #e2e8f0; }
     .code-copy-btn.copied { color: #22c55e; }
+    .toast {
+      position: fixed;
+      bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+      left: 50%;
+      transform: translateX(-50%) translateY(12px);
+      background: #1e293b;
+      color: #fff;
+      font-size: 13px;
+      padding: 8px 16px;
+      border-radius: 20px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      white-space: nowrap;
+      z-index: 9999;
+    }
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
     .settings-message {
       font-size: 13px;
@@ -622,6 +642,15 @@
     const MATCH_ANIMATION_MS = 260;
 
     const boardEl = document.getElementById('board');
+    const toastEl = document.getElementById('toast');
+    let toastTimer = null;
+    function showToast(msg) {
+      toastEl.textContent = msg;
+      toastEl.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => toastEl.classList.remove('show'), 1800);
+    }
+
     const startBtn = document.getElementById('startBtn');
     const rankingBtn = document.getElementById('rankingBtn');
     const messageEl = document.getElementById('message');
@@ -766,6 +795,7 @@
           const btn = document.getElementById('copyCodeBtn');
           btn.classList.add('copied');
           setTimeout(() => btn && btn.classList.remove('copied'), 1500);
+          showToast('コピーしました');
         });
         issueCodeAccordion.classList.add('open');
         issueCodeAccordion.setAttribute('aria-hidden', 'false');
@@ -1248,5 +1278,6 @@
       });
     }
   </script>
+  <div id="toast" class="toast"></div>
 </body>
 </html>
