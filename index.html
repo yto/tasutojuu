@@ -33,6 +33,9 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", sans-serif;
       line-height: 1.5;
       overflow: hidden;
+      overscroll-behavior: none;
+      user-select: none;
+      -webkit-touch-callout: none;
     }
 
     /* ── App shell ── */
@@ -949,8 +952,10 @@
       const b = board[row][col];
 
       if (a + b === 10) {
+        navigator.vibrate?.(40);
         handleMatch(selected.row, selected.col, row, col);
       } else {
+        navigator.vibrate?.([30, 40, 30]);
         selected = { row, col };
         setMessage(a + ' + ' + b + ' = ' + (a + b) + '。10ではありません。選択を移しました。');
         renderBoard();
