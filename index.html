@@ -602,7 +602,7 @@
       <hr style="border:none;border-top:1px solid var(--line);margin:0;" />
 
       <div>
-        <button id="issueCodeBtn" class="secondary">引き継ぎコード発行</button>
+        <button id="issueCodeBtn" class="secondary">ログインコード発行</button>
         <div id="issueCodeAccordion" class="accordion" aria-hidden="true">
           <div class="accordion-body">
             <div class="accordion-note">このコードを新しい端末で入力してください。24時間以内に1回だけ使えます。</div>
@@ -614,7 +614,7 @@
       <hr style="border:none;border-top:1px solid var(--line);margin:0;" />
 
       <div class="field">
-        <label for="restoreCodeInput">引き継ぎコード入力</label>
+        <label for="restoreCodeInput">ログインコード入力</label>
         <input id="restoreCodeInput" placeholder="XXXX-XXXX" maxlength="9" autocomplete="off" />
       </div>
       <div class="footer-actions">
@@ -866,7 +866,7 @@
           body: JSON.stringify({ code }),
         });
         const data = await res.json();
-        if (!res.ok || !data.ok) throw new Error(data.error || '引き継ぎに失敗しました');
+        if (!res.ok || !data.ok) throw new Error(data.error || 'ログインに失敗しました');
 
         localStorage.setItem('playerId', data.playerId);
         const entry = latestRanking.find((r) => r.player_id === data.playerId);
@@ -880,7 +880,7 @@
           }
         }
         restoreCodeInputEl.value = '';
-        showSettingsMessage('引き継ぎが完了しました。', 'ok');
+        showSettingsMessage('ログインしました。', 'ok');
         updateSettingsModal();
       } catch (err) {
         showSettingsMessage(err.message || 'エラーが発生しました', 'error');
