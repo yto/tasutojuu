@@ -862,9 +862,6 @@
       closeResultOverlay();
       await loadRanking();
     });
-    resultOverlayEl.addEventListener('click', (e) => {
-      if (e.target === resultOverlayEl) closeResultOverlay();
-    });
 
     function getPlayerId() {
       let playerId = localStorage.getItem('playerId');
