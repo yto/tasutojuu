@@ -1211,17 +1211,17 @@
 
     function launchSparks() {
       const emojis = ['✨', '⭐', '🌟', '💫'];
-      for (let i = 0; i < 12; i++) {
+      for (let i = 0; i < 24; i++) {
         setTimeout(() => {
           const el = document.createElement('span');
           el.className = 'spark';
           el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
-          el.style.left = (20 + Math.random() * 60) + 'vw';
-          el.style.top = (30 + Math.random() * 40) + 'vh';
-          el.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+          el.style.left = (10 + Math.random() * 80) + 'vw';
+          el.style.top = (20 + Math.random() * 55) + 'vh';
+          el.style.animationDuration = (1.2 + Math.random() * 0.8) + 's';
           document.body.appendChild(el);
           el.addEventListener('animationend', () => el.remove());
-        }, i * 80);
+        }, i * 120);
       }
     }
 
