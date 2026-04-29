@@ -384,6 +384,70 @@
       70%  { transform: scale(1.0); opacity: 1; }
       100% { transform: scale(0.7); opacity: 0; }
     }
+
+    .settings-info {
+      display: grid;
+      gap: 6px;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+    }
+
+    .settings-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 14px;
+    }
+
+    .settings-row .s-label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .settings-row .s-value {
+      font-weight: 700;
+    }
+
+    .accordion {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height 0.3s ease;
+    }
+
+    .accordion.open {
+      max-height: 160px;
+    }
+
+    .accordion-body {
+      padding-top: 10px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .accordion-note {
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .code-display {
+      font-size: 26px;
+      font-weight: 900;
+      letter-spacing: 0.12em;
+      text-align: center;
+      padding: 12px;
+      background: #f1f5f9;
+      border-radius: 12px;
+      border: 2px dashed #bfc9d7;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .settings-message {
+      font-size: 13px;
+      min-height: 1.4em;
+    }
   </style>
 </head>
 <body>
@@ -406,6 +470,7 @@
     <section class="panel">
       <div class="button-row">
         <button id="startBtn" class="primary">ゲームスタート</button>
+        <button id="settingsBtn" class="ghost">ユーザ設定</button>
         <div id="message" class="message">スタートを押すと30秒のタイムアタックが始まります。</div>
       </div>
     </section>
@@ -492,6 +557,49 @@
     </div>
   </div>
 
+  <div id="settingsOverlay" class="overlay" aria-hidden="true">
+    <div class="modal">
+      <div class="ranking-head" style="margin-bottom:0;">
+        <h2>ユーザ設定</h2>
+        <button id="closeSettingsBtn" class="ghost">閉じる</button>
+      </div>
+
+      <div class="settings-info">
+        <div class="settings-row">
+          <span class="s-label">ユーザ名</span>
+          <span id="settingsNickname" class="s-value">-</span>
+        </div>
+        <div class="settings-row">
+          <span class="s-label">自己ベスト</span>
+          <span id="settingsBest" class="s-value">-</span>
+        </div>
+        <div class="settings-row">
+          <span class="s-label">最終更新 (UTC)</span>
+          <span id="settingsUpdated" class="s-value">-</span>
+        </div>
+      </div>
+
+      <div>
+        <button id="issueCodeBtn" class="secondary">引き継ぎコード発行</button>
+        <div id="issueCodeAccordion" class="accordion" aria-hidden="true">
+          <div class="accordion-body">
+            <div class="accordion-note">このコードを新しい端末で入力してください。24時間以内に1回だけ使えます。</div>
+            <div id="issueCodeValue" class="code-display">-</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="restoreCodeInput">引き継ぎコード入力</label>
+        <input id="restoreCodeInput" placeholder="XXXX-XXXX" maxlength="9" autocomplete="off" />
+      </div>
+      <div class="footer-actions">
+        <button id="restoreBtn" class="primary">この端末に引き継ぐ</button>
+      </div>
+      <div id="settingsMessage" class="settings-message muted"></div>
+    </div>
+  </div>
+
   <script>
     const API_BASE = 'https://autumn-hall-9233.tatsuo-8d3.workers.dev';
     const BOARD_SIZE = 8;
@@ -520,6 +628,18 @@
     const closeRankingBtn = document.getElementById('closeRankingBtn');
     const countdownOverlayEl = document.getElementById('countdownOverlay');
     const countdownNumberEl = document.getElementById('countdownNumber');
+    const settingsBtn = document.getElementById('settingsBtn');
+    const settingsOverlayEl = document.getElementById('settingsOverlay');
+    const closeSettingsBtn = document.getElementById('closeSettingsBtn');
+    const settingsNicknameEl = document.getElementById('settingsNickname');
+    const settingsBestEl = document.getElementById('settingsBest');
+    const settingsUpdatedEl = document.getElementById('settingsUpdated');
+    const issueCodeBtn = document.getElementById('issueCodeBtn');
+    const issueCodeAccordion = document.getElementById('issueCodeAccordion');
+    const issueCodeValueEl = document.getElementById('issueCodeValue');
+    const restoreCodeInputEl = document.getElementById('restoreCodeInput');
+    const restoreBtn = document.getElementById('restoreBtn');
+    const settingsMessageEl = document.getElementById('settingsMessage');
 
     let board = [];
     let selected = null;
@@ -557,6 +677,79 @@
     closeRankingBtn.addEventListener('click', closeRankingOverlay);
     rankingOverlayEl.addEventListener('click', (e) => {
       if (e.target === rankingOverlayEl) closeRankingOverlay();
+    });
+
+    settingsBtn.addEventListener('click', openSettingsOverlay);
+    closeSettingsBtn.addEventListener('click', closeSettingsOverlay);
+    settingsOverlayEl.addEventListener('click', (e) => {
+      if (e.target === settingsOverlayEl) closeSettingsOverlay();
+    });
+
+    issueCodeBtn.addEventListener('click', async () => {
+      issueCodeBtn.disabled = true;
+      settingsMessageEl.textContent = '';
+      try {
+        const res = await fetch(API_BASE + '/api/issue-code', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerId: getPlayerId() }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || 'コード発行に失敗しました');
+        issueCodeValueEl.textContent = data.code;
+        issueCodeAccordion.classList.add('open');
+        issueCodeAccordion.setAttribute('aria-hidden', 'false');
+      } catch (err) {
+        settingsMessageEl.textContent = err.message || 'エラーが発生しました';
+      } finally {
+        issueCodeBtn.disabled = false;
+      }
+    });
+
+    restoreCodeInputEl.addEventListener('input', (e) => {
+      let val = e.target.value.replace(/[^A-Za-z0-9]/g, '').toUpperCase().slice(0, 8);
+      if (val.length > 4) val = val.slice(0, 4) + '-' + val.slice(4);
+      e.target.value = val;
+    });
+
+    restoreBtn.addEventListener('click', async () => {
+      const code = restoreCodeInputEl.value.trim().toUpperCase();
+      if (!code) {
+        settingsMessageEl.textContent = 'コードを入力してください。';
+        return;
+      }
+      restoreBtn.disabled = true;
+      settingsMessageEl.textContent = '';
+      try {
+        const res = await fetch(API_BASE + '/api/restore', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || '引き継ぎに失敗しました');
+
+        localStorage.setItem('playerId', data.playerId);
+        const entry = latestRanking.find((r) => r.player_id === data.playerId);
+        if (entry) {
+          bestScore = entry.best_score;
+          localStorage.setItem('tasujuuBestScore', String(bestScore));
+          bestValueEl.textContent = String(bestScore);
+          if (entry.nickname) {
+            localStorage.setItem('nickname', entry.nickname);
+            resultNicknameEl.value = entry.nickname;
+          }
+        }
+        restoreCodeInputEl.value = '';
+        settingsMessageEl.textContent = '引き継ぎが完了しました。';
+        settingsMessageEl.style.color = '#16a34a';
+        updateSettingsModal();
+      } catch (err) {
+        settingsMessageEl.textContent = err.message || 'エラーが発生しました';
+        settingsMessageEl.style.color = '#b91c1c';
+      } finally {
+        restoreBtn.disabled = false;
+      }
     });
 
     saveResultBtn.addEventListener('click', savePendingResult);
@@ -934,6 +1127,37 @@
     function closeRankingOverlay() {
       rankingOverlayEl.classList.remove('open');
       rankingOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function openSettingsOverlay() {
+      updateSettingsModal();
+      issueCodeAccordion.classList.remove('open');
+      issueCodeAccordion.setAttribute('aria-hidden', 'true');
+      issueCodeValueEl.textContent = '-';
+      restoreCodeInputEl.value = '';
+      settingsMessageEl.textContent = '';
+      settingsMessageEl.style.color = '';
+      settingsOverlayEl.classList.add('open');
+      settingsOverlayEl.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeSettingsOverlay() {
+      settingsOverlayEl.classList.remove('open');
+      settingsOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function updateSettingsModal() {
+      const playerId = getPlayerId();
+      const entry = latestRanking.find((r) => r.player_id === playerId);
+      if (entry) {
+        settingsNicknameEl.textContent = entry.nickname;
+        settingsBestEl.textContent = Number(entry.best_score).toLocaleString('ja-JP');
+        settingsUpdatedEl.textContent = entry.updated_at ? String(entry.updated_at).slice(0, 16) : '-';
+      } else {
+        settingsNicknameEl.textContent = localStorage.getItem('nickname') || '未登録';
+        settingsBestEl.textContent = String(bestScore);
+        settingsUpdatedEl.textContent = '-';
+      }
     }
 
     function setMessage(message, isError = false) {

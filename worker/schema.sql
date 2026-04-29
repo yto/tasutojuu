@@ -12,3 +12,9 @@ CREATE TABLE IF NOT EXISTS best_scores (
   best_score INTEGER NOT NULL,
   updated_at TEXT NOT NULL
 );
+
+CREATE TABLE IF NOT EXISTS restore_codes (
+  player_id  TEXT PRIMARY KEY,
+  code       TEXT NOT NULL UNIQUE,
+  created_at TEXT NOT NULL
+);

@@ -19,6 +19,14 @@ export default {
       return getRanking(env);
     }
 
+    if (url.pathname === '/api/issue-code' && request.method === 'POST') {
+      return issueCode(request, env);
+    }
+
+    if (url.pathname === '/api/restore' && request.method === 'POST') {
+      return restorePlayer(request, env);
+    }
+
     return json({ ok: false, error: 'Not Found' }, 404);
   },
 };
@@ -75,13 +83,94 @@ async function submitScore(request, env) {
 
 async function getRanking(env) {
   const result = await env.DB.prepare(
-    `SELECT player_id, nickname, best_score
+    `SELECT player_id, nickname, best_score, updated_at
      FROM best_scores
      ORDER BY best_score DESC, updated_at DESC
      LIMIT 1000`
   ).all();
 
   return json({ ok: true, ranking: result.results || [] });
+}
+
+async function issueCode(request, env) {
+  const origin = request.headers.get('Origin');
+  if (origin !== ALLOW_ORIGIN) {
+    return json({ ok: false, error: 'forbidden' }, 403);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'JSONが不正です' }, 400);
+  }
+
+  const playerId = String(body.playerId || '').trim();
+  if (!playerId || playerId.length > 100) {
+    return json({ ok: false, error: 'playerIdが不正です' }, 400);
+  }
+
+  const code = generateCode();
+
+  await env.DB.prepare(
+    `INSERT INTO restore_codes (player_id, code, created_at)
+     VALUES (?, ?, datetime('now'))
+     ON CONFLICT(player_id) DO UPDATE SET
+       code = excluded.code,
+       created_at = excluded.created_at`
+  )
+    .bind(playerId, code)
+    .run();
+
+  return json({ ok: true, code });
+}
+
+async function restorePlayer(request, env) {
+  const origin = request.headers.get('Origin');
+  if (origin !== ALLOW_ORIGIN) {
+    return json({ ok: false, error: 'forbidden' }, 403);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'JSONが不正です' }, 400);
+  }
+
+  const code = String(body.code || '').trim().toUpperCase();
+  if (!code) {
+    return json({ ok: false, error: 'コードが不正です' }, 400);
+  }
+
+  const row = await env.DB.prepare(
+    `SELECT player_id FROM restore_codes
+     WHERE code = ? AND created_at > datetime('now', '-24 hours')`
+  )
+    .bind(code)
+    .first();
+
+  if (!row) {
+    return json({ ok: false, error: 'コードが無効または期限切れです' }, 404);
+  }
+
+  await env.DB.prepare(`DELETE FROM restore_codes WHERE code = ?`)
+    .bind(code)
+    .run();
+
+  return json({ ok: true, playerId: row.player_id });
+}
+
+function generateCode() {
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  const bytes = new Uint8Array(8);
+  crypto.getRandomValues(bytes);
+  let code = '';
+  for (let i = 0; i < 8; i++) {
+    if (i === 4) code += '-';
+    code += chars[bytes[i] % chars.length];
+  }
+  return code;
 }
 
 function corsHeaders() {
