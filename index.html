@@ -450,6 +450,17 @@
       opacity: 1;
       transform: translateX(-50%) translateY(0);
     }
+    .spark {
+      position: fixed;
+      pointer-events: none;
+      font-size: 22px;
+      animation: sparkRise 1.1s ease-out forwards;
+      z-index: 9998;
+    }
+    @keyframes sparkRise {
+      0%   { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-120px) scale(0.4); opacity: 0; }
+    }
 
     .settings-message {
       font-size: 13px;
@@ -1186,6 +1197,7 @@
 
       if (pendingResult.isBest) {
         resultTextEl.textContent = pendingResult.reason + ' ユーザ名を入れてランキングに保存できます。';
+        launchSparks();
         saveResultBtn.style.display = '';
         resultNicknameEl.closest('.field').style.display = '';
       } else {
@@ -1195,6 +1207,22 @@
       }
       resultOverlayEl.classList.add('open');
       resultOverlayEl.setAttribute('aria-hidden', 'false');
+    }
+
+    function launchSparks() {
+      const emojis = ['✨', '⭐', '🌟', '💫'];
+      for (let i = 0; i < 12; i++) {
+        setTimeout(() => {
+          const el = document.createElement('span');
+          el.className = 'spark';
+          el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+          el.style.left = (20 + Math.random() * 60) + 'vw';
+          el.style.top = (30 + Math.random() * 40) + 'vh';
+          el.style.animationDuration = (0.8 + Math.random() * 0.6) + 's';
+          document.body.appendChild(el);
+          el.addEventListener('animationend', () => el.remove());
+        }, i * 80);
+      }
     }
 
     function closeResultOverlay() {
