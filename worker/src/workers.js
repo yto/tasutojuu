@@ -190,7 +190,7 @@ async function updateNickname(request, env) {
   }
 
   await env.DB.prepare(
-    `UPDATE best_scores SET nickname = ?, updated_at = datetime('now') WHERE player_id = ?`
+    `UPDATE best_scores SET nickname = ? WHERE player_id = ?`
   )
     .bind(nickname, playerId)
     .run();
