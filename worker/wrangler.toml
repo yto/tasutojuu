@@ -1,5 +1,5 @@
 name = "autumn-hall-9233"
-main = "src/index.js"
+main = "src/workers.js"
 compatibility_date = "2024-04-01"
 
 [[d1_databases]]
