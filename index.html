@@ -1053,6 +1053,7 @@
       startBtn.textContent = 'ゲームスタート';
       startBtn.classList.remove('secondary');
       startBtn.classList.add('primary');
+      startBtn.disabled = true;
 
       const isBest = score >= bestScore;
       if (score > bestScore) {
@@ -1069,6 +1070,7 @@
       if (timedOut) {
         await wait(2000);
       }
+      startBtn.disabled = false;
       showResultOverlay();
     }
 
