@@ -269,6 +269,24 @@
 
     .modal h2 { font-size: 24px; }
 
+    .result-modal {
+      justify-items: center;
+      text-align: center;
+    }
+
+    .result-modal .field,
+    .result-modal .footer-actions {
+      width: 100%;
+    }
+
+    .result-modal .field input {
+      text-align: center;
+    }
+
+    .result-modal .footer-actions {
+      justify-content: center;
+    }
+
     .result-score {
       font-size: 44px;
       font-weight: 900;
@@ -526,7 +544,7 @@
 
   <!-- Result -->
   <div id="resultOverlay" class="overlay" aria-hidden="true">
-    <div class="modal">
+    <div class="modal result-modal">
       <h2>ゲーム終了</h2>
       <div>
         <div class="result-note">今回のスコア</div>
