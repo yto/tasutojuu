@@ -618,7 +618,7 @@
         <input id="restoreCodeInput" placeholder="XXXX-XXXX" maxlength="9" autocomplete="off" />
       </div>
       <div class="footer-actions">
-        <button id="restoreBtn" class="primary">この端末に引き継ぐ</button>
+        <button id="restoreBtn" class="primary">ログインする</button>
       </div>
       <div id="settingsMessage" class="settings-message muted"></div>
     </div>
@@ -827,7 +827,7 @@
 
     function resetRestoreBtn() {
       restoreConfirming = false;
-      restoreBtn.textContent = 'この端末に引き継ぐ';
+      restoreBtn.textContent = 'ログインする';
       restoreBtn.classList.remove('secondary');
       restoreBtn.classList.add('primary');
       settingsMessageEl.textContent = '';
