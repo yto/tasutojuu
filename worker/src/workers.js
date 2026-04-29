@@ -27,6 +27,10 @@ export default {
       return restorePlayer(request, env);
     }
 
+    if (url.pathname === '/api/update-nickname' && request.method === 'POST') {
+      return updateNickname(request, env);
+    }
+
     return json({ ok: false, error: 'Not Found' }, 404);
   },
 };
@@ -159,6 +163,39 @@ async function restorePlayer(request, env) {
     .run();
 
   return json({ ok: true, playerId: row.player_id });
+}
+
+async function updateNickname(request, env) {
+  const origin = request.headers.get('Origin');
+  if (origin !== ALLOW_ORIGIN) {
+    return json({ ok: false, error: 'forbidden' }, 403);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'JSONが不正です' }, 400);
+  }
+
+  const playerId = String(body.playerId || '').trim();
+  const nickname = String(body.nickname || '').trim();
+
+  if (!playerId || playerId.length > 100) {
+    return json({ ok: false, error: 'playerIdが不正です' }, 400);
+  }
+
+  if (!nickname || nickname.length > 10) {
+    return json({ ok: false, error: 'ユーザ名は1〜10文字で入力してください' }, 400);
+  }
+
+  await env.DB.prepare(
+    `UPDATE best_scores SET nickname = ?, updated_at = datetime('now') WHERE player_id = ?`
+  )
+    .bind(nickname, playerId)
+    .run();
+
+  return json({ ok: true });
 }
 
 function generateCode() {

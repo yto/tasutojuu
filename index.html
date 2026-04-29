@@ -579,6 +579,16 @@
         </div>
       </div>
 
+      <div class="field">
+        <label for="settingsNicknameInput">ユーザ名を変更</label>
+        <input id="settingsNicknameInput" maxlength="10" placeholder="例: TATSUO" />
+      </div>
+      <div class="footer-actions">
+        <button id="changeNicknameBtn" class="secondary">変更する</button>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--line);margin:0;" />
+
       <div>
         <button id="issueCodeBtn" class="secondary">引き継ぎコード発行</button>
         <div id="issueCodeAccordion" class="accordion" aria-hidden="true">
@@ -634,6 +644,8 @@
     const settingsNicknameEl = document.getElementById('settingsNickname');
     const settingsBestEl = document.getElementById('settingsBest');
     const settingsUpdatedEl = document.getElementById('settingsUpdated');
+    const settingsNicknameInputEl = document.getElementById('settingsNicknameInput');
+    const changeNicknameBtn = document.getElementById('changeNicknameBtn');
     const issueCodeBtn = document.getElementById('issueCodeBtn');
     const issueCodeAccordion = document.getElementById('issueCodeAccordion');
     const issueCodeValueEl = document.getElementById('issueCodeValue');
@@ -683,6 +695,35 @@
     closeSettingsBtn.addEventListener('click', closeSettingsOverlay);
     settingsOverlayEl.addEventListener('click', (e) => {
       if (e.target === settingsOverlayEl) closeSettingsOverlay();
+    });
+
+    changeNicknameBtn.addEventListener('click', async () => {
+      const nickname = settingsNicknameInputEl.value.trim();
+      if (!nickname) {
+        showSettingsMessage('ユーザ名を入力してください。', 'error');
+        return;
+      }
+      changeNicknameBtn.disabled = true;
+      try {
+        const res = await fetch(API_BASE + '/api/update-nickname', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerId: getPlayerId(), nickname }),
+        });
+        const data = await res.json();
+        if (!res.ok || !data.ok) throw new Error(data.error || '変更に失敗しました');
+        localStorage.setItem('nickname', nickname);
+        resultNicknameEl.value = nickname;
+        // latestRankingのキャッシュも更新
+        const entry = latestRanking.find((r) => r.player_id === getPlayerId());
+        if (entry) entry.nickname = nickname;
+        updateSettingsModal();
+        showSettingsMessage('ユーザ名を変更しました。', 'ok');
+      } catch (err) {
+        showSettingsMessage(err.message || 'エラーが発生しました', 'error');
+      } finally {
+        changeNicknameBtn.disabled = false;
+      }
     });
 
     issueCodeBtn.addEventListener('click', async () => {
@@ -741,12 +782,10 @@
           }
         }
         restoreCodeInputEl.value = '';
-        settingsMessageEl.textContent = '引き継ぎが完了しました。';
-        settingsMessageEl.style.color = '#16a34a';
+        showSettingsMessage('引き継ぎが完了しました。', 'ok');
         updateSettingsModal();
       } catch (err) {
-        settingsMessageEl.textContent = err.message || 'エラーが発生しました';
-        settingsMessageEl.style.color = '#b91c1c';
+        showSettingsMessage(err.message || 'エラーが発生しました', 'error');
       } finally {
         restoreBtn.disabled = false;
       }
@@ -1129,6 +1168,11 @@
       rankingOverlayEl.setAttribute('aria-hidden', 'true');
     }
 
+    function showSettingsMessage(text, type) {
+      settingsMessageEl.textContent = text;
+      settingsMessageEl.style.color = type === 'ok' ? '#16a34a' : '#b91c1c';
+    }
+
     function openSettingsOverlay() {
       updateSettingsModal();
       issueCodeAccordion.classList.remove('open');
@@ -1153,10 +1197,13 @@
         settingsNicknameEl.textContent = entry.nickname;
         settingsBestEl.textContent = Number(entry.best_score).toLocaleString('ja-JP');
         settingsUpdatedEl.textContent = entry.updated_at ? String(entry.updated_at).slice(0, 16) : '-';
+        settingsNicknameInputEl.value = entry.nickname;
       } else {
-        settingsNicknameEl.textContent = localStorage.getItem('nickname') || '未登録';
+        const savedNickname = localStorage.getItem('nickname') || '';
+        settingsNicknameEl.textContent = savedNickname || '未登録';
         settingsBestEl.textContent = String(bestScore);
         settingsUpdatedEl.textContent = '-';
+        settingsNicknameInputEl.value = savedNickname;
       }
     }
 
