@@ -1,5 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <rect width="512" height="512" fill="#14532d"/>
+  <rect width="512" height="512" fill="#2563eb"/>
   <text x="256" y="176" text-anchor="middle" dominant-baseline="central"
         font-family="ui-monospace, 'Courier New', monospace" font-size="70" font-weight="700">
     <tspan fill="#ffffff">3 + 7 = </tspan><tspan fill="#fbbf24">10</tspan>
