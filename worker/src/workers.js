@@ -31,6 +31,10 @@ export default {
       return updateNickname(request, env);
     }
 
+    if (url.pathname === '/api/record' && request.method === 'POST') {
+      return recordScore(request, env);
+    }
+
     return json({ ok: false, error: 'Not Found' }, 404);
   },
 };
@@ -65,13 +69,6 @@ async function submitScore(request, env) {
   }
 
   await env.DB.prepare(
-    `INSERT INTO scores (player_id, nickname, score, created_at)
-     VALUES (?, ?, ?, datetime('now'))`
-  )
-    .bind(playerId, nickname, score)
-    .run();
-
-  await env.DB.prepare(
     `INSERT INTO best_scores (player_id, nickname, best_score, updated_at)
      VALUES (?, ?, ?, datetime('now'))
      ON CONFLICT(player_id) DO UPDATE SET
@@ -80,6 +77,40 @@ async function submitScore(request, env) {
        updated_at = datetime('now')`
   )
     .bind(playerId, nickname, score)
+    .run();
+
+  return json({ ok: true });
+}
+
+async function recordScore(request, env) {
+  const origin = request.headers.get('Origin');
+  if (origin !== ALLOW_ORIGIN) {
+    return json({ ok: false, error: 'forbidden' }, 403);
+  }
+
+  let body;
+  try {
+    body = await request.json();
+  } catch {
+    return json({ ok: false, error: 'JSONが不正です' }, 400);
+  }
+
+  const playerId = String(body.playerId || '').trim();
+  const score = Number(body.score);
+
+  if (!playerId || playerId.length > 100) {
+    return json({ ok: false, error: 'playerIdが不正です' }, 400);
+  }
+
+  if (!Number.isInteger(score) || score < 0 || score > 999999999) {
+    return json({ ok: false, error: 'スコアは0以上の整数で入力してください' }, 400);
+  }
+
+  await env.DB.prepare(
+    `INSERT INTO scores (player_id, score, created_at)
+     VALUES (?, ?, datetime('now'))`
+  )
+    .bind(playerId, score)
     .run();
 
   return json({ ok: true });

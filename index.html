@@ -1124,6 +1124,14 @@
 
       pendingResult = { score, reason, isBest, timedOut };
 
+      if (timedOut) {
+        fetch(API_BASE + '/api/record', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerId: getPlayerId(), score }),
+        }).catch(() => {});
+      }
+
       setMessage(reason + ' スコア: ' + score);
       await loadRanking();
 
