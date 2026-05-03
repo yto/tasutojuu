@@ -118,9 +118,12 @@ async function recordScore(request, env) {
 
 async function getRanking(env) {
   const result = await env.DB.prepare(
-    `SELECT player_id, nickname, best_score, updated_at
-     FROM best_scores
-     ORDER BY best_score DESC, updated_at DESC
+    `SELECT b.player_id, b.nickname, b.best_score, b.updated_at,
+            COUNT(CASE WHEN s.created_at > datetime('now', '-7 days') THEN 1 END) AS weekly_count
+     FROM best_scores b
+     LEFT JOIN scores s ON s.player_id = b.player_id
+     GROUP BY b.player_id
+     ORDER BY b.best_score DESC, b.updated_at DESC
      LIMIT 1000`
   ).all();
 
