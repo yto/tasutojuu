@@ -190,6 +190,22 @@
       padding: 0 8px;
     }
 
+    .mode-badge {
+      display: none;
+      padding: 5px 10px;
+      border-radius: 999px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 800;
+      text-align: center;
+    }
+
+    .mode-badge.active {
+      display: inline-block;
+    }
+
     /* ── Bottom bar ── */
     .bottom-bar {
       flex-shrink: 0;
@@ -291,6 +307,17 @@
       font-size: 44px;
       font-weight: 900;
       font-variant-numeric: tabular-nums;
+    }
+
+    .result-mode-note {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1d4ed8;
+      font-size: 13px;
+      font-weight: 700;
     }
 
     .result-note { color: var(--muted); }
@@ -611,6 +638,7 @@
 
     <main class="board-area">
       <div id="board" class="board" aria-label="タスジュウ盤面"></div>
+      <div id="modeBadge" class="mode-badge" aria-hidden="true">みんなで同時プレイ・ランキング対象外</div>
       <div id="message" class="message">スタートを押すと30秒のタイムアタックが始まります。</div>
     </main>
 
@@ -645,11 +673,12 @@
   <!-- Result -->
   <div id="resultOverlay" class="overlay" aria-hidden="true">
     <div class="modal result-modal">
-      <h2>ゲーム終了</h2>
+      <h2 id="resultTitle">ゲーム終了</h2>
       <div>
-        <div class="result-note">今回のスコア</div>
+        <div id="resultScoreLabel" class="result-note">今回のスコア</div>
         <div id="resultScore" class="result-score">0</div>
       </div>
+      <div id="resultModeNote" class="result-mode-note" hidden></div>
       <div id="resultText" class="result-note"></div>
       <div class="field">
         <label for="resultNickname">ユーザ名</label>
@@ -786,7 +815,7 @@
         <button id="closeShareBtn" class="ghost">閉じる</button>
       </div>
       <div class="party-section">
-        <p>毎分0秒と30秒に、同じ盤面で30秒チャレンジを始めます。</p>
+        <p>毎分0秒と30秒に、同じ盤面で30秒チャレンジ！</p>
         <div>
           <div class="muted">次の開始まで</div>
           <div id="partyNextTime" class="party-next-time">--秒</div>
@@ -817,6 +846,7 @@
 
     const boardEl = document.getElementById('board');
     const toastEl = document.getElementById('toast');
+    const modeBadgeEl = document.getElementById('modeBadge');
     let toastTimer = null;
     function showToast(msg) {
       toastEl.textContent = msg;
@@ -834,7 +864,10 @@
     const timeStatEl = document.getElementById('timeStat');
     const progressFillEl = document.getElementById('progressFill');
     const resultOverlayEl = document.getElementById('resultOverlay');
+    const resultTitleEl = document.getElementById('resultTitle');
+    const resultScoreLabelEl = document.getElementById('resultScoreLabel');
     const resultScoreEl = document.getElementById('resultScore');
+    const resultModeNoteEl = document.getElementById('resultModeNote');
     const resultTextEl = document.getElementById('resultText');
     const resultNicknameEl = document.getElementById('resultNickname');
     const saveResultBtn = document.getElementById('saveResultBtn');
@@ -1295,6 +1328,7 @@
       locked = false;
       renderBoard();
       gameActive = true;
+      updateModeBadge();
       startBtn.disabled = false;
       startBtn.textContent = '終了（棄権）';
       startBtn.classList.remove('primary');
@@ -1374,12 +1408,19 @@
       setMessage('スタートを押すと30秒のタイムアタックが始まります。');
     }
 
+    function updateModeBadge() {
+      const isParty = gameActive && gameMode === 'party';
+      modeBadgeEl.classList.toggle('active', isParty);
+      modeBadgeEl.setAttribute('aria-hidden', isParty ? 'false' : 'true');
+    }
+
     async function endGame(reason, timedOut) {
       if (!gameActive) return;
 
       const endedMode = gameMode;
       gameActive = false;
       locked = true;
+      updateModeBadge();
       clearInterval(timerId);
       timerId = null;
       selected = null;
@@ -1423,6 +1464,7 @@
       startBtn.disabled = false;
       gameMode = 'normal';
       gameRandom = Math.random;
+      updateModeBadge();
       showResultOverlay();
     }
 
@@ -1536,8 +1578,13 @@
 
     function showResultOverlay() {
       if (!pendingResult) return;
+      const isPartyResult = pendingResult.mode === 'party';
+      resultTitleEl.textContent = isPartyResult ? '同時プレイ終了' : 'ゲーム終了';
+      resultScoreLabelEl.textContent = isPartyResult ? '同時プレイスコア' : '今回のスコア';
       resultScoreEl.textContent = String(pendingResult.score);
       resultNicknameEl.value = localStorage.getItem('nickname') || '';
+      resultModeNoteEl.hidden = !isPartyResult;
+      resultModeNoteEl.textContent = isPartyResult ? 'みんなで同じ盤面に挑戦しました。ランキングとプレイ回数カウントには反映されません。' : '';
       saveResultBtn.disabled = false;
       saveResultBtn.textContent = 'この名前で結果を保存';
       saveResultBtn.classList.remove('ghost');
