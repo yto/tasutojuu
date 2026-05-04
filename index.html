@@ -495,6 +495,34 @@
       font-size: 14px;
       padding-left: 1.4em;
     }
+
+    /* ── Share modal ── */
+    .share-modal {
+      justify-items: center;
+      text-align: center;
+    }
+
+    .share-qr {
+      width: min(260px, 72vw);
+      aspect-ratio: 1 / 1;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .share-url {
+      width: 100%;
+      padding: 10px 12px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      font-size: 13px;
+      color: var(--accent-2);
+      overflow-wrap: anywhere;
+      user-select: text;
+      -webkit-user-select: text;
+    }
   </style>
 </head>
 <body>
@@ -529,9 +557,10 @@
     <footer class="bottom-bar">
       <button id="startBtn" class="primary start-btn">ゲームスタート</button>
       <div class="sub-actions">
-        <button id="rankingBtn" class="ghost sub-btn">ランキング</button>
-        <button id="settingsBtn" class="ghost sub-btn">👤</button>
-        <button id="helpBtn" class="ghost sub-btn">？</button>
+        <button id="rankingBtn" class="ghost sub-btn" aria-label="ランキング">🏆</button>
+        <button id="settingsBtn" class="ghost sub-btn" aria-label="マイページ">👤</button>
+        <button id="shareBtn" class="ghost sub-btn" aria-label="共有">👥</button>
+        <button id="helpBtn" class="ghost sub-btn" aria-label="遊び方">ℹ️</button>
       </div>
     </footer>
 
@@ -678,10 +707,26 @@
     </div>
   </div>
 
+  <!-- Share -->
+  <div id="shareOverlay" class="overlay" aria-hidden="true">
+    <div class="modal share-modal">
+      <div class="ranking-head" style="margin-bottom:0;width:100%;">
+        <h2>共有</h2>
+        <button id="closeShareBtn" class="ghost">閉じる</button>
+      </div>
+      <img class="share-qr" src="qr-tasutojuu.svg" alt="タスジュウのQRコード" width="260" height="260" />
+      <div id="shareUrl" class="share-url">https://yto.github.io/tasutojuu/</div>
+      <div class="footer-actions" style="justify-content:center;">
+        <button id="copyShareUrlBtn" class="primary">URLをコピー</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast" class="toast"></div>
 
   <script>
     const API_BASE = 'https://autumn-hall-9233.tatsuo-8d3.workers.dev';
+    const SHARE_URL = 'https://yto.github.io/tasutojuu/';
     const BOARD_SIZE = 8;
     const GAME_SECONDS = 30;
     const MATCH_ANIMATION_MS = 260;
@@ -737,6 +782,11 @@
     const closeHelpBtn = document.getElementById('closeHelpBtn');
     const helpStartBtn = document.getElementById('helpStartBtn');
     const helpCloseBtn = document.getElementById('helpCloseBtn');
+    const shareBtn = document.getElementById('shareBtn');
+    const shareOverlayEl = document.getElementById('shareOverlay');
+    const closeShareBtn = document.getElementById('closeShareBtn');
+    const shareUrlEl = document.getElementById('shareUrl');
+    const copyShareUrlBtn = document.getElementById('copyShareUrlBtn');
 
     let board = [];
     let selected = null;
@@ -792,6 +842,20 @@
     helpStartBtn.addEventListener('click', () => {
       closeHelpOverlay();
       startGame();
+    });
+
+    shareBtn.addEventListener('click', openShareOverlay);
+    closeShareBtn.addEventListener('click', closeShareOverlay);
+    shareOverlayEl.addEventListener('click', (e) => {
+      if (e.target === shareOverlayEl) closeShareOverlay();
+    });
+    copyShareUrlBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(SHARE_URL);
+        showToast('URLをコピーしました');
+      } catch (err) {
+        showToast('コピーできませんでした');
+      }
     });
 
     changeNicknameBtn.addEventListener('click', async () => {
@@ -1308,6 +1372,17 @@
     function closeHelpOverlay() {
       helpOverlayEl.classList.remove('open');
       helpOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function openShareOverlay() {
+      shareUrlEl.textContent = SHARE_URL;
+      shareOverlayEl.classList.add('open');
+      shareOverlayEl.setAttribute('aria-hidden', 'false');
+    }
+
+    function closeShareOverlay() {
+      shareOverlayEl.classList.remove('open');
+      shareOverlayEl.setAttribute('aria-hidden', 'true');
     }
 
     function showSettingsMessage(text, type) {

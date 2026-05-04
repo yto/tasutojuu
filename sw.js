@@ -1,8 +1,9 @@
-const CACHE = 'tasujuu-20260430';
+const CACHE = 'tasujuu-20260504';
 const ASSETS = [
   './index.html',
   './manifest.json',
   './icon.svg',
+  './qr-tasutojuu.svg',
 ];
 
 self.addEventListener('install', e => {
