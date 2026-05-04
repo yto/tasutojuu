@@ -575,6 +575,14 @@
       border: 1px solid #bfdbfe;
       border-radius: 14px;
     }
+
+    .party-next-time {
+      font-size: 28px;
+      font-weight: 900;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
   </style>
 </head>
 <body>
@@ -627,7 +635,7 @@
   <div id="partyWaitOverlay" class="overlay party-wait-overlay" aria-hidden="true">
     <div class="party-wait-panel">
       <div class="party-wait-title">みんなで同時プレイ</div>
-      <div id="partyWaitTime" class="party-wait-time">--.-</div>
+      <div id="partyWaitTime" class="party-wait-time">--</div>
       <div class="party-wait-note">同じ時間枠の人と同じ盤面で遊びます。<br>ランキングとプレイ回数カウントには反映されません。</div>
       <div class="party-wait-note">時間になったら自動で始まります</div>
       <button id="cancelPartyWaitBtn" class="ghost">参加をやめる</button>
@@ -779,6 +787,10 @@
       </div>
       <div class="party-section">
         <p>毎分0秒と30秒に、同じ盤面で30秒チャレンジを始めます。</p>
+        <div>
+          <div class="muted">次の開始まで</div>
+          <div id="partyNextTime" class="party-next-time">--秒</div>
+        </div>
         <p class="muted">ランキングとプレイ回数カウントには反映されません。</p>
         <button id="joinPartyBtn" class="primary">次の同時プレイに参加</button>
       </div>
@@ -863,6 +875,7 @@
     const shareUrlEl = document.getElementById('shareUrl');
     const copyShareUrlBtn = document.getElementById('copyShareUrlBtn');
     const joinPartyBtn = document.getElementById('joinPartyBtn');
+    const partyNextTimeEl = document.getElementById('partyNextTime');
 
     let board = [];
     let selected = null;
@@ -873,6 +886,7 @@
     let locked = false;
     let timerId = null;
     let partyWaitTimerId = null;
+    let partyNextTimerId = null;
     let gameEndAt = 0;
     let gameMode = 'normal';
     let gameRandom = Math.random;
@@ -1338,7 +1352,7 @@
         return;
       }
 
-      partyWaitTimeEl.textContent = (leftMs / 1000).toFixed(1);
+      partyWaitTimeEl.textContent = String(Math.ceil(leftMs / 1000));
       setMessage('同時プレイに参加待機中です。');
     }
 
@@ -1587,13 +1601,23 @@
     function openShareOverlay() {
       if (partyWaiting) return;
       shareUrlEl.textContent = SHARE_URL;
+      updatePartyNextTime();
+      clearInterval(partyNextTimerId);
+      partyNextTimerId = setInterval(updatePartyNextTime, 100);
       shareOverlayEl.classList.add('open');
       shareOverlayEl.setAttribute('aria-hidden', 'false');
     }
 
     function closeShareOverlay() {
+      clearInterval(partyNextTimerId);
+      partyNextTimerId = null;
       shareOverlayEl.classList.remove('open');
       shareOverlayEl.setAttribute('aria-hidden', 'true');
+    }
+
+    function updatePartyNextTime() {
+      const leftMs = getNextPartyStartAt() - Date.now();
+      partyNextTimeEl.textContent = Math.ceil(Math.max(0, leftMs) / 1000) + '秒';
     }
 
     function showSettingsMessage(text, type) {
