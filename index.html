@@ -380,6 +380,37 @@
       100% { transform: scale(0.7); opacity: 0; }
     }
 
+    .party-wait-overlay {
+      background: rgba(15, 23, 42, 0.72);
+      z-index: 35;
+    }
+
+    .party-wait-panel {
+      width: min(420px, 100%);
+      display: grid;
+      gap: 16px;
+      justify-items: center;
+      text-align: center;
+      color: #fff;
+    }
+
+    .party-wait-title {
+      font-size: 18px;
+      font-weight: 800;
+    }
+
+    .party-wait-time {
+      font-size: clamp(64px, 22vw, 120px);
+      font-weight: 900;
+      font-variant-numeric: tabular-nums;
+      line-height: 1;
+    }
+
+    .party-wait-note {
+      color: #dbeafe;
+      font-size: 14px;
+    }
+
     /* ── Settings modal ── */
     .settings-info {
       display: grid;
@@ -523,6 +554,27 @@
       user-select: text;
       -webkit-user-select: text;
     }
+
+    .share-section {
+      width: 100%;
+      display: grid;
+      gap: 10px;
+      justify-items: center;
+      padding: 12px 14px;
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+    }
+
+    .party-section {
+      width: 100%;
+      display: grid;
+      gap: 10px;
+      padding: 14px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 14px;
+    }
   </style>
 </head>
 <body>
@@ -559,7 +611,7 @@
       <div class="sub-actions">
         <button id="rankingBtn" class="ghost sub-btn" aria-label="ランキング">🏆</button>
         <button id="settingsBtn" class="ghost sub-btn" aria-label="マイページ">👤</button>
-        <button id="shareBtn" class="ghost sub-btn" aria-label="共有">👥</button>
+        <button id="shareBtn" class="ghost sub-btn" aria-label="みんなで同時プレイ">👥</button>
         <button id="helpBtn" class="ghost sub-btn" aria-label="遊び方">ℹ️</button>
       </div>
     </footer>
@@ -569,6 +621,17 @@
   <!-- Countdown -->
   <div id="countdownOverlay" class="countdown-overlay" aria-hidden="true">
     <div id="countdownNumber" class="countdown-number"></div>
+  </div>
+
+  <!-- Party wait -->
+  <div id="partyWaitOverlay" class="overlay party-wait-overlay" aria-hidden="true">
+    <div class="party-wait-panel">
+      <div class="party-wait-title">みんなで同時プレイ</div>
+      <div id="partyWaitTime" class="party-wait-time">--.-</div>
+      <div class="party-wait-note">同じ時間枠の人と同じ盤面で遊びます。<br>ランキングとプレイ回数カウントには反映されません。</div>
+      <div class="party-wait-note">時間になったら自動で始まります</div>
+      <button id="cancelPartyWaitBtn" class="ghost">参加をやめる</button>
+    </div>
   </div>
 
   <!-- Result -->
@@ -700,11 +763,6 @@
         <button id="helpCloseBtn" class="ghost">閉じる</button>
       </div>
       <div class="settings-info" style="text-align:center;gap:10px;">
-        <strong>友だちに共有</strong>
-        <img class="share-qr" src="qr-tasutojuu.svg" alt="タスジュウのQRコード" width="220" height="220" style="width:min(220px,68vw);justify-self:center;" />
-        <div class="share-url">https://yto.github.io/tasutojuu/</div>
-      </div>
-      <div class="settings-info" style="text-align:center;gap:10px;">
         <p class="muted" style="font-size:13px;">楽しんでもらえたら、応援していただけると嬉しいです。<br>金額は自由です（100円からでも大歓迎です）。<br>※任意のご支援であり、見返りはありません。</p>
         <a href="https://buy.stripe.com/14A6oGfzz4Dxf4468jdMI00" target="_blank" rel="noopener" class="ghost" style="display:inline-block;padding:10px 20px;border-radius:10px;font-size:14px;font-weight:700;text-decoration:none;color:#0f172a;background:#e2e8f0;">応援する（任意の金額）</a>
       </div>
@@ -716,13 +774,21 @@
   <div id="shareOverlay" class="overlay" aria-hidden="true">
     <div class="modal share-modal">
       <div class="ranking-head" style="margin-bottom:0;width:100%;">
-        <h2>共有</h2>
+        <h2>みんなで同時プレイ</h2>
         <button id="closeShareBtn" class="ghost">閉じる</button>
       </div>
-      <img class="share-qr" src="qr-tasutojuu.svg" alt="タスジュウのQRコード" width="260" height="260" />
-      <div id="shareUrl" class="share-url">https://yto.github.io/tasutojuu/</div>
-      <div class="footer-actions" style="justify-content:center;">
-        <button id="copyShareUrlBtn" class="primary">URLをコピー</button>
+      <div class="party-section">
+        <p>毎分0秒と30秒に、同じ盤面で30秒チャレンジを始めます。</p>
+        <p class="muted">ランキングとプレイ回数カウントには反映されません。</p>
+        <button id="joinPartyBtn" class="primary">次の同時プレイに参加</button>
+      </div>
+      <div class="share-section">
+        <strong>友だちを誘う</strong>
+        <img class="share-qr" src="qr-tasutojuu.svg" alt="タスジュウのQRコード" width="260" height="260" />
+        <div id="shareUrl" class="share-url">https://yto.github.io/tasutojuu/</div>
+        <div class="footer-actions" style="justify-content:center;">
+          <button id="copyShareUrlBtn" class="secondary">URLをコピー</button>
+        </div>
       </div>
     </div>
   </div>
@@ -734,6 +800,7 @@
     const SHARE_URL = 'https://yto.github.io/tasutojuu/';
     const BOARD_SIZE = 8;
     const GAME_SECONDS = 30;
+    const PARTY_BUCKET_MS = 30 * 1000;
     const MATCH_ANIMATION_MS = 260;
 
     const boardEl = document.getElementById('board');
@@ -767,6 +834,9 @@
     const closeRankingBtn = document.getElementById('closeRankingBtn');
     const countdownOverlayEl = document.getElementById('countdownOverlay');
     const countdownNumberEl = document.getElementById('countdownNumber');
+    const partyWaitOverlayEl = document.getElementById('partyWaitOverlay');
+    const partyWaitTimeEl = document.getElementById('partyWaitTime');
+    const cancelPartyWaitBtn = document.getElementById('cancelPartyWaitBtn');
     const settingsBtn = document.getElementById('settingsBtn');
     const settingsOverlayEl = document.getElementById('settingsOverlay');
     const closeSettingsBtn = document.getElementById('closeSettingsBtn');
@@ -792,6 +862,7 @@
     const closeShareBtn = document.getElementById('closeShareBtn');
     const shareUrlEl = document.getElementById('shareUrl');
     const copyShareUrlBtn = document.getElementById('copyShareUrlBtn');
+    const joinPartyBtn = document.getElementById('joinPartyBtn');
 
     let board = [];
     let selected = null;
@@ -801,7 +872,12 @@
     let gameActive = false;
     let locked = false;
     let timerId = null;
+    let partyWaitTimerId = null;
     let gameEndAt = 0;
+    let gameMode = 'normal';
+    let gameRandom = Math.random;
+    let partyWaiting = false;
+    let partyStartAt = 0;
     let pendingResult = null;
     let latestRanking = [];
 
@@ -816,12 +892,15 @@
     startBtn.addEventListener('click', () => {
       if (gameActive) {
         endGame('棄権しました。', false);
+      } else if (partyWaiting) {
+        cancelPartyWait();
       } else {
         startGame();
       }
     });
 
     rankingBtn.addEventListener('click', () => {
+      if (partyWaiting) return;
       renderFullRankingModal();
       rankingOverlayEl.classList.add('open');
       rankingOverlayEl.setAttribute('aria-hidden', 'false');
@@ -862,6 +941,8 @@
         showToast('コピーできませんでした');
       }
     });
+    joinPartyBtn.addEventListener('click', joinNextPartyGame);
+    cancelPartyWaitBtn.addEventListener('click', cancelPartyWait);
 
     changeNicknameBtn.addEventListener('click', async () => {
       const nickname = settingsNicknameInputEl.value.trim();
@@ -989,7 +1070,12 @@
 
     saveResultBtn.addEventListener('click', savePendingResult);
     playAgainBtn.addEventListener('click', async () => {
+      const previousMode = pendingResult?.mode;
       closeResultOverlay();
+      if (previousMode === 'party') {
+        joinNextPartyGame();
+        return;
+      }
       await loadRanking();
       startGame();
     });
@@ -1016,7 +1102,34 @@
     }
 
     function randomDigit() {
-      return Math.floor(Math.random() * 9) + 1;
+      return Math.floor(gameRandom() * 9) + 1;
+    }
+
+    function createSeededRandom(seed) {
+      let h = 2166136261;
+      for (let i = 0; i < seed.length; i += 1) {
+        h ^= seed.charCodeAt(i);
+        h = Math.imul(h, 16777619);
+      }
+      return function seededRandom() {
+        h += 0x6D2B79F5;
+        let t = h;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+
+    function getPartyBucket(now = Date.now()) {
+      return Math.floor(now / PARTY_BUCKET_MS);
+    }
+
+    function getNextPartyStartAt(now = Date.now()) {
+      return (getPartyBucket(now) + 1) * PARTY_BUCKET_MS;
+    }
+
+    function createPartySeed(bucket) {
+      return 'tasujuu-party-v1:' + bucket;
     }
 
     function renderBoard() {
@@ -1141,9 +1254,16 @@
       countdownOverlayEl.setAttribute('aria-hidden', 'true');
     }
 
-    async function startGame() {
+    async function startGame(options = {}) {
+      if (partyWaiting) {
+        cancelPartyWait();
+      }
+      const mode = options.mode || 'normal';
       closeRankingOverlay();
       closeResultOverlay();
+      closeShareOverlay();
+      gameMode = mode;
+      gameRandom = options.seed ? createSeededRandom(options.seed) : Math.random;
       score = 0;
       scoreValueEl.textContent = '0';
       startBtn.disabled = true;
@@ -1152,7 +1272,9 @@
       progressFillEl.style.width = '100%';
       progressFillEl.classList.remove('urgent');
 
-      await runCountdown();
+      if (!options.skipCountdown) {
+        await runCountdown();
+      }
 
       hintCells = new Set();
       initializeBoard();
@@ -1164,21 +1286,90 @@
       startBtn.classList.remove('primary');
       startBtn.classList.add('secondary');
       gameEndAt = Date.now() + GAME_SECONDS * 1000;
-      setMessage('ゲーム開始！ 合計10の隣接ペアを探してください。');
+      setMessage(mode === 'party' ? '同時プレイ開始！ 合計10の隣接ペアを探してください。' : 'ゲーム開始！ 合計10の隣接ペアを探してください。');
       updateTime();
       clearInterval(timerId);
       timerId = setInterval(updateTime, 50);
     }
 
+    function joinNextPartyGame() {
+      if (gameActive || partyWaiting) return;
+
+      closeShareOverlay();
+      closeResultOverlay();
+      closeRankingOverlay();
+      gameMode = 'party';
+      partyWaiting = true;
+      partyStartAt = getNextPartyStartAt();
+      locked = true;
+      selected = null;
+      hintCells = new Set();
+      renderBoard();
+      startBtn.disabled = true;
+      progressFillEl.style.width = '0%';
+      progressFillEl.classList.remove('urgent');
+      timeStatEl.classList.remove('time-warning');
+      timeValueEl.textContent = GAME_SECONDS.toFixed(1);
+      partyWaitOverlayEl.classList.add('open');
+      partyWaitOverlayEl.setAttribute('aria-hidden', 'false');
+
+      clearInterval(partyWaitTimerId);
+      updatePartyWait();
+      partyWaitTimerId = setInterval(updatePartyWait, 100);
+    }
+
+    function updatePartyWait() {
+      if (!partyWaiting) return;
+
+      const now = Date.now();
+      const leftMs = partyStartAt - now;
+      if (leftMs <= 0) {
+        const bucket = getPartyBucket(partyStartAt);
+        clearInterval(partyWaitTimerId);
+        partyWaitTimerId = null;
+        partyWaiting = false;
+        partyWaitOverlayEl.classList.remove('open');
+        partyWaitOverlayEl.setAttribute('aria-hidden', 'true');
+        startGame({
+          mode: 'party',
+          seed: createPartySeed(bucket),
+          skipCountdown: true,
+        });
+        return;
+      }
+
+      partyWaitTimeEl.textContent = (leftMs / 1000).toFixed(1);
+      setMessage('同時プレイに参加待機中です。');
+    }
+
+    function cancelPartyWait() {
+      if (!partyWaiting) return;
+
+      partyWaiting = false;
+      partyStartAt = 0;
+      clearInterval(partyWaitTimerId);
+      partyWaitTimerId = null;
+      partyWaitOverlayEl.classList.remove('open');
+      partyWaitOverlayEl.setAttribute('aria-hidden', 'true');
+      gameMode = 'normal';
+      gameRandom = Math.random;
+      startBtn.disabled = false;
+      startBtn.textContent = 'ゲームスタート';
+      startBtn.classList.remove('secondary');
+      startBtn.classList.add('primary');
+      setMessage('スタートを押すと30秒のタイムアタックが始まります。');
+    }
+
     async function endGame(reason, timedOut) {
       if (!gameActive) return;
 
+      const endedMode = gameMode;
       gameActive = false;
       locked = true;
       clearInterval(timerId);
       timerId = null;
       selected = null;
-      hintCells = computeHintCells();
+      hintCells = endedMode === 'party' ? new Set() : computeHintCells();
       renderBoard();
       timeValueEl.textContent = '0.0';
       progressFillEl.style.width = '0%';
@@ -1189,16 +1380,17 @@
       startBtn.classList.add('primary');
       startBtn.disabled = true;
 
-      const isBest = score >= bestScore;
-      if (score > bestScore) {
+      const rankingEligible = endedMode !== 'party';
+      const isBest = rankingEligible && score >= bestScore;
+      if (rankingEligible && score > bestScore) {
         bestScore = score;
         bestValueEl.textContent = String(bestScore);
         // localStorage への保存はランキング登録成功時に行う
       }
 
-      pendingResult = { score, reason, isBest, timedOut };
+      pendingResult = { score, reason, isBest, timedOut, rankingEligible, mode: endedMode };
 
-      if (timedOut) {
+      if (timedOut && rankingEligible) {
         fetch(API_BASE + '/api/record', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -1207,12 +1399,16 @@
       }
 
       setMessage(reason + ' スコア: ' + score);
-      await loadRanking();
+      if (rankingEligible) {
+        await loadRanking();
+      }
 
       if (timedOut) {
         await wait(2000);
       }
       startBtn.disabled = false;
+      gameMode = 'normal';
+      gameRandom = Math.random;
       showResultOverlay();
     }
 
@@ -1235,6 +1431,10 @@
 
     async function savePendingResult() {
       if (!pendingResult) return;
+      if (!pendingResult.rankingEligible) {
+        resultTextEl.textContent = pendingResult.reason + ' 同時プレイモードのため、ランキング対象外です。';
+        return;
+      }
       const nickname = resultNicknameEl.value.trim();
       if (!nickname) {
         resultTextEl.textContent = 'ユーザ名を入力してください。';
@@ -1329,7 +1529,11 @@
       saveResultBtn.classList.remove('ghost');
       saveResultBtn.classList.add('primary');
 
-      if (pendingResult.isBest) {
+      if (!pendingResult.rankingEligible) {
+        resultTextEl.textContent = pendingResult.reason + ' 同時プレイモードのため、ランキング対象外です。';
+        saveResultBtn.style.display = 'none';
+        resultNicknameEl.closest('.field').style.display = 'none';
+      } else if (pendingResult.isBest) {
         resultTextEl.textContent = pendingResult.reason + ' ユーザ名を入れてランキングに保存できます。';
         launchSparks();
         saveResultBtn.style.display = '';
@@ -1370,6 +1574,7 @@
     }
 
     function openHelpOverlay() {
+      if (partyWaiting) return;
       helpOverlayEl.classList.add('open');
       helpOverlayEl.setAttribute('aria-hidden', 'false');
     }
@@ -1380,6 +1585,7 @@
     }
 
     function openShareOverlay() {
+      if (partyWaiting) return;
       shareUrlEl.textContent = SHARE_URL;
       shareOverlayEl.classList.add('open');
       shareOverlayEl.setAttribute('aria-hidden', 'false');
@@ -1396,6 +1602,7 @@
     }
 
     function openSettingsOverlay() {
+      if (partyWaiting) return;
       updateSettingsModal();
       issueCodeAccordion.classList.remove('open');
       issueCodeAccordion.setAttribute('aria-hidden', 'true');
