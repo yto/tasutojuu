@@ -66,15 +66,15 @@ npx wrangler d1 execute puzzle-ranking --file=schema.sql
 ## 注意事項
 
 - `localStorage.playerId` はプレイヤーの識別子。変更しないこと
-- `player_id` はこのゲームの唯一の資格情報。**公開レスポンスに絶対に含めない**（ランキングは SHA-256 の `public_id` を返す）。経緯は [notes/security-playerid-exposure-2026-08-21.md](./notes/security-playerid-exposure-2026-08-21.md)
+- `player_id` はこのゲームの唯一の資格情報。**公開レスポンスに絶対に含めない**（ランキングは SHA-256 の `public_id` を返す）
 - パーティーモードのシード `'tasujuu-party-v1:' + bucket` を変えると既存の同時プレイが壊れる
 - ランキングAPIはOriginヘッダーを検証しているため、直接 `fetch` する場合は Origin を付けること
 
 ## 作業メモ
 
-調査・検討の経緯は notes/ に `<topic>-<YYYY-MM-DD>.md` の形式で置く。
-topic は英数字とハイフン（本文は日本語でよい）。
-冒頭に作成日と目的、末尾に「## 参照」を書く。
-判断の背景を知りたいときは notes/ を読むこと。
+**このリポジトリは Public なので、作業メモをここには置かない。**
+調査・検討の経緯は private な `research` リポの `notes/` に
+`tasujuu-<topic>-<YYYY-MM-DD>.md` の形式で置いてある（手元では `~/github/research/notes/`）。
+判断の背景を知りたいときはそちらを読むこと。
 
-このリポジトリは Public なので、notes/ の内容は誰でも読める。
+このリポジトリを private 化したら、`notes/` を作ってこちらへ戻す。
