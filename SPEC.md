@@ -110,7 +110,12 @@ CORS許可オリジン: `https://yto.github.io`（Origin ヘッダー検証）
 
 ### GET /api/ranking
 
-ランキング上位1000件を取得。
+ランキング上位1000件を取得。認証なしで誰でも取得できる。
+
+`player_id` はこのゲームの唯一の資格情報なので、レスポンスに含めない。
+フロントが「自分の行」を判別できるよう、代わりに `public_id`
+（`player_id` の SHA-256 を16進小文字にしたもの）を返す。
+フロントは `crypto.subtle.digest` で自分の `playerId` のハッシュを計算して突き合わせる。
 
 **レスポンス**
 ```json
@@ -118,7 +123,7 @@ CORS許可オリジン: `https://yto.github.io`（Origin ヘッダー検証）
   "ok": true,
   "ranking": [
     {
-      "player_id": "...",
+      "public_id": "3f2a...（player_id の SHA-256）",
       "nickname": "TATSUO",
       "best_score": 42,
       "updated_at": "2026-01-01 12:00:00",

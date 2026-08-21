@@ -1008,7 +1008,7 @@
         if (!res.ok || !data.ok) throw new Error(data.error || '変更に失敗しました');
         localStorage.setItem('nickname', nickname);
         resultNicknameEl.value = nickname;
-        const entry = latestRanking.find((r) => r.player_id === getPlayerId());
+        const entry = latestRanking.find(isSelfRow);
         if (entry) entry.nickname = nickname;
         updateSettingsModal();
         showSettingsMessage('ユーザ名を変更しました。', 'ok');
@@ -1095,7 +1095,8 @@
         if (!res.ok || !data.ok) throw new Error(data.error || 'ログインに失敗しました');
 
         localStorage.setItem('playerId', data.playerId);
-        const entry = latestRanking.find((r) => r.player_id === data.playerId);
+        await refreshPublicId();
+        const entry = latestRanking.find(isSelfRow);
         if (entry) {
           bestScore = entry.best_score;
           localStorage.setItem('tasujuuBestScore', String(bestScore));
@@ -1139,6 +1140,28 @@
       }
       return playerId;
     }
+
+    // ランキングは player_id を返さない（それ自体が資格情報のため）。
+    // 代わりに SHA-256 ハッシュの public_id で自分の行を判別する。
+    let myPublicId = null;
+
+    async function refreshPublicId() {
+      try {
+        const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(getPlayerId()));
+        myPublicId = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, '0')).join('');
+      } catch {
+        myPublicId = null;
+      }
+      return myPublicId;
+    }
+
+    function isSelfRow(row) {
+      if (!row) return false;
+      if (row.public_id) return myPublicId !== null && row.public_id === myPublicId;
+      return row.player_id === getPlayerId(); // 旧APIとの互換
+    }
+
+    refreshPublicId();
 
     function initializeBoard() {
       board = Array.from({ length: BOARD_SIZE }, () =>
@@ -1540,6 +1563,7 @@
           throw new Error(data.error || '読み込みに失敗しました');
         }
         latestRanking = data.ranking || [];
+        await refreshPublicId();
         renderFullRankingModal();
       } catch (err) {
         fullRankingBodyEl.innerHTML = '<tr><td colspan="3">' + escapeHtml(err.message || 'エラーが発生しました') + '</td></tr>';
@@ -1553,12 +1577,11 @@
         return;
       }
 
-      const playerId = getPlayerId();
       const top100 = latestRanking.slice(0, 100);
-      const selfIndex = latestRanking.findIndex((row) => row.player_id === playerId);
+      const selfIndex = latestRanking.findIndex(isSelfRow);
 
       fullRankingBodyEl.innerHTML = top100.map((row, index) => {
-        const isSelf = row.player_id === playerId;
+        const isSelf = isSelfRow(row);
         return '<tr class="' + (isSelf ? 'self-row' : '') + '">' +
           '<td>' + (index + 1) + '</td>' +
           '<td>' + escapeHtml(row.nickname) + (isSelf ? '（自分）' : '') + '</td>' +
@@ -1691,8 +1714,7 @@
     }
 
     function updateSettingsModal() {
-      const playerId = getPlayerId();
-      const entry = latestRanking.find((r) => r.player_id === playerId);
+      const entry = latestRanking.find(isSelfRow);
       if (entry) {
         settingsNicknameEl.textContent = entry.nickname;
         settingsBestEl.textContent = Number(entry.best_score).toLocaleString('ja-JP');

@@ -116,6 +116,13 @@ async function recordScore(request, env) {
   return json({ ok: true });
 }
 
+async function sha256Hex(input) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(input));
+  return Array.from(new Uint8Array(buf))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 async function getRanking(env) {
   const result = await env.DB.prepare(
     `SELECT b.player_id, b.nickname, b.best_score, b.updated_at,
@@ -127,7 +134,16 @@ async function getRanking(env) {
      LIMIT 1000`
   ).all();
 
-  return json({ ok: true, ranking: result.results || [] });
+  // player_id はこのゲームの唯一の資格情報なので、公開ランキングには絶対に含めない。
+  // フロントが「自分の行」を判別できるよう、SHA-256 ハッシュだけを返す。
+  const ranking = await Promise.all(
+    (result.results || []).map(async ({ player_id, ...rest }) => ({
+      public_id: await sha256Hex(player_id),
+      ...rest,
+    }))
+  );
+
+  return json({ ok: true, ranking });
 }
 
 async function issueCode(request, env) {
