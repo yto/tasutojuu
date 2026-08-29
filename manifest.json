@@ -1,6 +1,6 @@
 {
-  "name": "タスジュウ (tasujuu)",
-  "short_name": "タスジュウ",
+  "name": "タスジュウ Classic",
+  "short_name": "タスジュウ Classic",
   "description": "足すと10になる隣接ペアを探すタイムアタックパズル",
   "start_url": "./",
   "display": "standalone",

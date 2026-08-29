@@ -1,4 +1,4 @@
-const CACHE = 'tasujuu-20260504-party';
+const CACHE = 'tasujuu-20260829-classic';
 const ASSETS = [
   './index.html',
   './manifest.json',
