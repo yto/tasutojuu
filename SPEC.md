@@ -5,7 +5,7 @@
 「タスジュウ Classic」は8×8の数字盤面で、隣接する2マスの合計が10になるペアを30秒間でできるだけ多く見つけるタイムアタックパズルゲームです。PWAとして動作し、グローバルランキングに対応しています。
 
 - フロントエンド: `https://yto.github.io/tasutojuu/`
-- API: `https://autumn-hall-9233.tatsuo-8d3.workers.dev`
+- API: `https://autumn-hall-9233.ytolabo.workers.dev`（2026-09-22 に Cloudflare のアカウントサブドメインを `tatsuo-8d3` から `ytolabo` に変更した。**同じ日に Worker 自体も消えていたことが分かったので再デプロイして復活させた**。D1 `puzzle-ranking` のデータは残っていた）
 
 ---
 
@@ -104,7 +104,7 @@
 
 ## API
 
-ベースURL: `https://autumn-hall-9233.tatsuo-8d3.workers.dev`
+ベースURL: `https://autumn-hall-9233.ytolabo.workers.dev`
 
 CORS許可オリジン: `https://yto.github.io`（Origin ヘッダー検証）
 
